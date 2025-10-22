@@ -1,0 +1,85 @@
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
+from sqlalchemy.orm import selectinload
+from typing import List
+from db.db import get_async_session
+from db import models
+from schemas.schemas import TripCreate, Trip
+
+router = APIRouter(prefix="/trips", tags=["trips"])
+
+TripModel = models.Trip
+
+#***** To create a trip *****
+@router.post("/", response_model=Trip, status_code=status.HTTP_201_CREATED)
+async def create_trip(trip_in: TripCreate, db: AsyncSession = Depends(get_async_session)):
+    db_trip = TripModel(**trip_in.model_dump(), owner_id=1)  # owner_id placeholder
+    db.add(db_trip)
+    try:
+        await db.commit()
+        await db.refresh(db_trip)
+    except Exception:
+        await db.rollback()
+        raise
+    
+
+    # Reload the trip with relationships eagerly loaded before returning
+    result = await db.execute(
+        select(TripModel)
+        .filter_by(id=db_trip.id)
+        .options(
+            selectinload(TripModel.accommodations),
+            selectinload(TripModel.itineraries),
+            selectinload(TripModel.owner),
+        )
+    )
+    trip_with_rels = result.scalars().first()
+    return trip_with_rels
+
+#***** To list all trips *****
+@router.get("/", response_model=List[Trip])
+async def list_trips(skip: int = 0, limit: int = 100, db: AsyncSession = Depends(get_async_session)):
+    result = await db.execute(
+        select(TripModel)
+        .offset(skip)
+        .limit(limit)
+        .options(
+            selectinload(TripModel.accommodations),
+            selectinload(TripModel.itineraries),
+            selectinload(TripModel.owner),
+        )
+    )
+    return result.scalars().all()
+
+#***** To get a specific trip by ID *****
+@router.get("/{trip_id}", response_model=Trip)
+async def get_trip(trip_id: int, db: AsyncSession = Depends(get_async_session)):
+    result = await db.execute(
+        select(TripModel)
+        .filter_by(id=trip_id)
+        .options(
+            selectinload(TripModel.accommodations),
+            selectinload(TripModel.itineraries),
+            selectinload(TripModel.owner),
+        )
+    )
+    obj = result.scalars().first()
+    if not obj:
+        raise HTTPException(status_code=404, detail="Trip not found")
+    return obj
+
+#***** To delete (soft delete) a trip *****
+@router.delete("/{trip_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_trip(trip_id: int, db: AsyncSession = Depends(get_async_session)):
+    result = await db.execute(select(TripModel).filter_by(id=trip_id))
+    obj = result.scalars().first()
+    if not obj:
+        raise HTTPException(status_code=404, detail="Trip not found")
+    await db.delete(obj)
+    try:
+        await db.commit()
+    except Exception:
+        await db.rollback()
+        raise
+    return
