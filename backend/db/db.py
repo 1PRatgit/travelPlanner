@@ -24,8 +24,6 @@ def create_tables():
 class Base(DeclarativeBase):
     pass
 
-
-# Make sure this URL uses an async driver (e.g. postgresql+asyncpg://...)
 ASYNC_DATABASE_URL = getattr(settings, "ASYNC_SQLALCHEMY_DATABASE_URL", settings.SQLALCHEMY_DATABASE_URL)
 
 async_engine = create_async_engine(ASYNC_DATABASE_URL, echo=settings.DEBUG)

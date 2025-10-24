@@ -7,7 +7,7 @@ class Settings(BaseSettings):
     SQLALCHEMY_DATABASE_URL: str
     API_PREFIX: str = "/api"
     DEBUG: bool = False
-    ALLOW_ORIGINS: List[AnyHttpUrl] = []
+    ALLOW_ORIGINS: List[str] = []
 
     class Config:
         env_file = ".env"
