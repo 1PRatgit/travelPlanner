@@ -89,17 +89,6 @@ function TripCard({ trip_id }) {
                 Booking Ref: {trip.booking_ref}
               </small>
             )}
-            <button
-              onClick={handleReload}
-              className="btn btn-sm"
-              style={{
-                backgroundColor: "#ffd6e8",
-                borderColor: "#ffb6c1",
-                color: "#333",
-              }}
-            >
-              View Details
-            </button>
           </div>
         </div>
       </div>

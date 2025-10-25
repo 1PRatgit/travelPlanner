@@ -1,10 +1,12 @@
 import React, { useEffect } from "react";
 import { useState } from "react";
 import api from "../../api/axiosInstance";
-import { useTripLoader } from "../../hooks/useTripLoader";
+import TripCard from "./TripCard";
+
 
 export default function TripList({}) {
     const[getTrips, setGetTrips] = useState([])
+    const [selectedTripId, setSelectedTripId] = useState(null); // <-- new state
 
      const onViewDetails =async ()=>{
         try {
@@ -15,7 +17,12 @@ export default function TripList({}) {
         }
     }
 
+    // toggle selection so clicking again hides details
+    const handleSelectTrip = (trip_id) => {
+        setSelectedTripId(prev => (prev === trip_id ? null : trip_id));
+    }
 
+    
     useEffect(() => {
         // Inject minimal rose theme CSS once
         if (document.getElementById("triplist-rose-css")) return;
@@ -56,20 +63,30 @@ export default function TripList({}) {
     return (
         <div className="container-fluid px-0">
             {getTrips.map((t) => (
-                <div className="card rose-card mb-3" key={t.id}>
-                    <div className="card-body d-flex justify-content-between align-items-center">
-                        <h5 className="card-title mb-0">{t.title}</h5>
-                        <div>
-                            <button
-                                type="button"
-                                className="btn btn-rose"
-                                // onClick={() => useTripLoader(t.id)}
-                            >
-                                View Details
-                            </button>
+                <React.Fragment key={t.id}>
+                    <div className="card rose-card mb-3">
+                        <div className="card-body d-flex justify-content-between align-items-center">
+                            <h5 className="card-title mb-0">{t.title}</h5>
+                            <div>
+                                <button
+                                    type="button"
+                                    className="btn btn-rose"
+                                    onClick={() => handleSelectTrip(t.id)}
+                                >
+                                    {selectedTripId === t.id ? "Hide Details" : "View Details"}
+                                </button>
+                            </div>
+                            
                         </div>
                     </div>
-                </div>
+
+                    {/* Render TripCard immediately below the specific trip card */}
+                    {selectedTripId === t.id && (
+                        <div className="mb-3">
+                            <TripCard trip_id={selectedTripId} />
+                        </div>
+                    )}
+                </React.Fragment>
             ))}
         </div>
     );
