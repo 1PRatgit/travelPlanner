@@ -29,7 +29,7 @@ async def create_trip(trip_in: TripCreate, db: AsyncSession = Depends(get_async_
         select(TripModel)
         .filter_by(id=db_trip.id)
         .options(
-            selectinload(TripModel.accommodations),
+            selectinload(TripModel.trip_to_accommodation),
             selectinload(TripModel.itineraries),
             selectinload(TripModel.owner),
         )
@@ -45,9 +45,10 @@ async def list_trips(skip: int = 0, limit: int = 100, db: AsyncSession = Depends
         .offset(skip)
         .limit(limit)
         .options(
-            selectinload(TripModel.accommodations),
+            selectinload(TripModel.trip_to_accommodation),
             selectinload(TripModel.itineraries),
             selectinload(TripModel.owner),
+            selectinload(TripModel.itineraries).selectinload(models.Itinerary.activities_in_day),
         )
     )
     return result.scalars().all()
@@ -59,9 +60,10 @@ async def get_trip(trip_id: int, db: AsyncSession = Depends(get_async_session)):
         select(TripModel)
         .filter_by(id=trip_id)
         .options(
-            selectinload(TripModel.accommodations),
+            selectinload(TripModel.trip_to_accommodation),
             selectinload(TripModel.itineraries),
             selectinload(TripModel.owner),
+            selectinload(TripModel.itineraries).selectinload(models.Itinerary.activities_in_day),
         )
     )
     obj = result.scalars().first()
@@ -69,7 +71,7 @@ async def get_trip(trip_id: int, db: AsyncSession = Depends(get_async_session)):
         raise HTTPException(status_code=404, detail="Trip not found")
     return obj
 
-#***** To delete (soft delete) a trip *****
+#***** To delete  a trip *****
 @router.delete("/{trip_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_trip(trip_id: int, db: AsyncSession = Depends(get_async_session)):
     result = await db.execute(select(TripModel).filter_by(id=trip_id))

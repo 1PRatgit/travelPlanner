@@ -1,22 +1,23 @@
 from __future__ import annotations
 from pydantic import BaseModel, Field
 from datetime import date, time,datetime
-from typing import Optional
+from sqlalchemy import Date
+from typing import List, Optional
 
 
 # ******* Trip Schemas *******
 
 class TripBase(BaseModel):
     """Base schema for creating and updating a Trip."""
-    title: str = Field(..., max_length=255)
-    category: Optional[str] = Field(None, max_length=100)
-    destination: str = Field(..., max_length=255)
-    start_date: datetime
-    end_date: datetime
+    title: str 
+    category: Optional[str] = None
+    destination: str 
+    start_date: date  
+    end_date: date   
     estimated_budget: Optional[float] = None
     preferences: Optional[dict] = None
     notes: Optional[str] = None
-    booking_ref: Optional[str] = Field(None, max_length=100)
+    # accommodation_id: Optional[int] = None
 
 class TripCreate(TripBase):
     """Schema for creating a new Trip."""
@@ -30,21 +31,23 @@ class Trip(TripBase):
     is_active: bool
     created_at: datetime
     updated_at: datetime
-    days: list[ItineraryDay] = Field(default_factory=list)
-    accommodations: list[Accommodation] = Field(default_factory=list)
+    itineraries: List[ItineraryDay] = Field(default_factory=list, alias="itineraries")
+    trip_to_accommodation: List[Accommodation] = Field(default_factory=list, alias="accommodations")
 
     class Config:
         from_attributes= True  # Allows Pydantic to read data directly from SQLAlchemy models
+        populate_by_name = True  # To allow using alias names during population
 
 # ******* Accommodation Schemas *******
 
 class AccommodationBase(BaseModel):
     title: str = Field(..., max_length=255)
     booking_ref: Optional[str] = Field(None, max_length=100)
-    location: str = Field(..., max_length=255)
-    check_in_date: date
-    check_out_date: date
+    location: str 
+    check_in: datetime = Field(alias="check_in")
+    check_out: datetime = Field(alias="check_out")
     cost: Optional[float] = None
+    trip_id: int
 
 class AccommodationCreate(AccommodationBase):
     # Note: trip_id is often passed via the URL path in the API, not the body
@@ -52,7 +55,6 @@ class AccommodationCreate(AccommodationBase):
 
 class Accommodation(AccommodationBase):
     id: int
-    trip_id: int
 
     class Config:
         from_attributes= True  # Allows Pydantic to read data directly from SQLAlchemy models
@@ -61,19 +63,16 @@ class Accommodation(AccommodationBase):
 
 class ItineraryDayBase(BaseModel):
     day_number: int
-    date: date
-    accommodation_id: Optional[int] = None
+    Date: date 
     transport_id: Optional[int] = None
-    activity_id: Optional[int] = None
 
 class ItineraryDayCreate(ItineraryDayBase):
-    activities: list[ActivityCreate] = Field(default_factory=list)
+    activities_in_day: list[ActivityCreate] = Field(default_factory=list)
 
 class ItineraryDay(ItineraryDayBase):
     id: int
     trip_id: int
-    activities: list[Activity] = Field(default_factory=list)
-    accommodation_details: Optional[Accommodation] = None
+    activities_in_day: list[Activity] = Field(default_factory=list)
     class Config:
         from_attributes= True 
 
@@ -84,17 +83,18 @@ class ActivityBase(BaseModel):
     category: str = Field(..., max_length=50, description="e.g., 'Sightseeing', 'Meal', 'Transit'")
     start_time: time
     end_time: Optional[time] = None
-    location_name: Optional[str] = Field(None, max_length=255)
+    location: Optional[str] = Field(None, max_length=255)
     notes: Optional[str] = None
     is_completed: bool = False
+    activity_date: date
+    cost: Optional[float] = None
 
 class ActivityCreate(ActivityBase):
     pass
 
 class Activity(ActivityBase):
-    id: int
-    day_id: int
-
+    # id: int
+    # itinerary_id: int
     class Config:
         from_attributes= True
 

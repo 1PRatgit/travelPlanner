@@ -3,6 +3,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from core.config import settings
 from routers import trips as trips_router
 from routers import users as users_router
+from routers import itineries as itineraries_router
+from routers import activities as activities_router
+from routers import accomodation as accommodations_router
 from db.db import create_tables
 import db.models  # ensure model classes are imported so Base.metadata includes them
 
@@ -25,6 +28,10 @@ app.add_middleware(
 # include routers
 app.include_router(trips_router.router, prefix=settings.API_PREFIX)
 app.include_router(users_router.router, prefix=settings.API_PREFIX)
+app.include_router(itineraries_router.router, prefix=settings.API_PREFIX)
+app.include_router(activities_router.router, prefix=settings.API_PREFIX)
+app.include_router(accommodations_router.router, prefix=settings.API_PREFIX)
+
 
 @app.on_event("startup")
 async def on_startup():
