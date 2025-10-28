@@ -1,7 +1,26 @@
 import React from 'react';
-
+import { useState,useEffect } from 'react';
+import TripCreate from './tripForm/TripCreate';
 export default function NavBar() {
+  const [showModal, setShowModal] = useState(false);
+
+  // closes modal when ESC or backdrop clicked
+  useEffect(() => {
+    const handleKey = (e) => e.key === "Escape" && setShowModal(false);
+    document.addEventListener("keydown", handleKey);
+    return () => document.removeEventListener("keydown", handleKey);
+  }, []);
+
+  const handleBackdropClick = (e) => {
+    if (e.target.classList.contains("modal")) setShowModal(false);
+  };
+
+  const handleTripCreated = (trip) => {
+    console.log("Trip created:", trip);
+    setShowModal(false);
+  };
   return (
+    <>
     <nav
       className="navbar navbar-expand-lg navbar-light"
       role="navigation"
@@ -42,6 +61,22 @@ export default function NavBar() {
             <li className="nav-item me-3">
               <a className="nav-link" href="/mytrips">MyTrips</a>
             </li>
+              {/* New Trip Button */}
+              <li className="nav-item me-3">
+                <button
+                  className="btn btn-rose fw-semibold"
+                  onClick={() => setShowModal(true)}
+                  style={{
+                    backgroundColor: "#ffd6e8",
+                    border: "1px solid #ffb6c1",
+                    color: "#333",
+                  }}
+                >
+                  + New Trip
+                </button>
+              </li>
+            
+
 
             <li className="nav-item d-flex align-items-center me-4">  {/* added me-4 for right margin */}
               {/* user icon */}
@@ -53,6 +88,45 @@ export default function NavBar() {
           </ul>
         </div>
       </div>
-    </nav>
+    </nav> 
+     {/* Modal (Bootstrap fade animation + backdrop click-to-close) */}
+      {showModal && (
+        <div
+          className="modal fade show"
+          style={{
+            display: "block",
+            backgroundColor: "rgba(0,0,0,0.5)",
+            zIndex: 1050,
+          }}
+          onClick={handleBackdropClick}
+        >
+          <div
+            className="modal-dialog modal-lg modal-dialog-centered"
+            role="document"
+          >
+            <div className="modal-content shadow-lg">
+              <div
+                className="modal-header"
+                style={{ borderBottomColor: "#ffd6e8" }}
+              >
+                <h5 className="modal-title fw-bold text-primary">
+                  {/* Create a New Trip */}
+                </h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => setShowModal(false)}
+                  aria-label="Close"
+                ></button>
+              </div>
+
+              <div className="modal-body">
+                <TripCreate onTripCreated={handleTripCreated} />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      </>
   );
 }

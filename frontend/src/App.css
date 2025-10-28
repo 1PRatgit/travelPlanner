@@ -36,3 +36,107 @@
     transform: rotate(360deg);
   }
 }
+
+/* Custom CSS for Itinerary Activities */
+
+/* Base Item Styling */
+.activity-item {
+  border-left: 5px solid #ffd6e8; /* Rose color highlight */
+  margin-bottom: 12px; /* Space between activities */
+  padding: 15px; /* Internal padding */
+  list-style: none; /* Remove default list bullet */
+  border-radius: .25rem; /* Slightly rounded corners for aesthetics */
+  background-color: #fff; /* Ensure white background if card has a different one */
+}
+
+/* Main Info Section (Title & Category) */
+.activity-main-info {
+  flex-grow: 1; 
+  min-width: 55%; /* Give it a bit more space by default */
+  display: flex; /* Use flexbox for internal alignment */
+  flex-direction: column; /* Stack title and category vertically */
+  justify-content: center; /* Vertically center content if there's extra space */
+}
+
+/* Style the title (ACT1 + Pending Badge) */
+.activity-title {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #333;
+  display: flex; /* Make the title and badge inline-flex */
+  align-items: center; /* Vertically align title text and badge */
+  margin-bottom: 0.25rem; /* Small space below title to category */
+  line-height: 1.2; /* Tighten line height */
+}
+
+/* Style the category (muesuem) */
+.activity-category {
+  font-style: italic;
+  font-size: 0.9rem;
+  color: #6c757d; /* Muted text color */
+  margin-bottom: 0; /* Remove extra bottom margin */
+  line-height: 1.2; /* Tighten line height */
+}
+
+/* Style the details section (Time, Location, Cost) */
+.activity-details {
+  text-align: right; 
+  display: flex; /* Use flexbox to stack details vertically */
+  flex-direction: column;
+  justify-content: center; /* Vertically center content if there's extra space */
+  /* If time wraps, adjust min-width of main-info or remove flex-wrap on parent */
+}
+
+/* Adjust text color and size for better visual hierarchy */
+.activity-time {
+  font-size: 1rem;
+  color: #0d6efd; /* Bootstrap primary blue, adjust if you have a custom primary */
+  margin-bottom: 0; /* Important for tight stacking */
+}
+
+.activity-location {
+  font-size: 0.85rem;
+  color: #6c757d; /* Muted secondary color */
+  margin-bottom: 0; /* Important for tight stacking */
+}
+
+.activity-cost {
+  font-size: 0.85rem;
+  color: #17a2b8; /* Bootstrap info blue, adjust if you have a custom info color */
+  margin-bottom: 0; /* Important for tight stacking */
+}
+
+/* Optional: Better look for notes */
+.activity-notes {
+  border-top: 1px dashed #e9ecef; /* Lighter dashed line */
+  padding-top: 8px; /* More space from the line */
+  margin-top: 10px; /* Space from the content above */
+  font-size: 0.85rem;
+  color: #6c757d;
+}
+
+/* Media query to ensure good stacking on small screens */
+@media (max-width: 576px) {
+  .activity-item {
+    padding: 10px;
+  }
+  .activity-main-info {
+    min-width: 100%; /* Full width on extra-small screens */
+    margin-bottom: 8px; /* Space between main info and stacked details */
+  }
+  .activity-details {
+    text-align: left; /* Switch to left-align details for better flow */
+    width: 100%;
+  }
+  .activity-title {
+    margin-bottom: 0.15rem; /* Even tighter on small screens */
+  }
+}
+
+.modal.fade .modal-dialog {
+  transition: transform 0.3s ease-out;
+  transform: translateY(-10px);
+}
+.modal.show .modal-dialog {
+  transform: translateY(0);
+}

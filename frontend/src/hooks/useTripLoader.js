@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import api from "../api/axiosInstance";
 
-export function useTripLoader (trip_id) {  // Changed from TripLoader1 to TripLoader
+export function useTripLoader (trip_id) {
   const [trip, setTrip] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);

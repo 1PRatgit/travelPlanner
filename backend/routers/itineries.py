@@ -6,8 +6,6 @@ from typing import List
 from db.db import get_async_session
 from db import models
 from schemas.schemas import ItineraryDayCreate, ItineraryDay, ActivityCreate, AccommodationCreate
-from routers.activities import create_activity 
-from routers.accomodation import create_accommodation  # If needed
 
 router = APIRouter(prefix="/itineraries", tags=["itineraries"])
 ItineraryModel = models.Itinerary
@@ -16,14 +14,13 @@ ItineraryModel = models.Itinerary
 @router.post("/trips/{trip_id}/itineraries/", response_model=ItineraryDay, status_code=status.HTTP_201_CREATED)
 async def create_itinerary(
     trip_id: int,
-    # Use a single, unified model for the request body
     itinerary_data: ItineraryDayCreate, 
     db: AsyncSession = Depends(get_async_session)
     ):
     # 1. Create the Itinerary Day record
     # Use only the fields from the ItineraryDayBase part of the model
     db_itinerary = ItineraryModel(**itinerary_data.model_dump(
-        exclude={'activities'} # Exclude related lists/objects
+        exclude={'activities','accommodations'} # Exclude related lists/objects
     ), trip_id=trip_id)
     db.add(db_itinerary)
     
@@ -38,7 +35,7 @@ async def create_itinerary(
     if itinerary_data.activities_in_day:
         db_activities = []
         for activity_in in itinerary_data.activities_in_day:
-            # **Directly create the Activity model instance**
+            # Directly create the Activity model instance
             db_activity = models.Activity(
                 **activity_in.model_dump(),
                 itinerary_id=db_itinerary.id 

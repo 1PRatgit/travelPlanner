@@ -1,14 +1,23 @@
-import React from "react";
+import { useState } from "react";
 import { useTripLoader } from "../../hooks/useTripLoader";
+import { useItineraryLoader } from "../../hooks/useItineraryLoader";
+import {formatTime,formatDate} from "../../utils/utils"
 
 function TripCard({ trip_id }) {
   const { trip, loading, error, loadTrip } = useTripLoader(trip_id);
-  const handleReload = () => {
-    loadTrip(trip_id);
-  };
-  const formatDate = (dateStr) => {
-    const options = { year: "numeric", month: "short", day: "numeric" };
-    return new Date(dateStr).toLocaleDateString(undefined, options);
+  const [showItinerary, setShowItinerary] = useState(false);
+
+  const {
+    itinerary,
+    itineraryLoading,
+    error: itineraryError, 
+  } = useItineraryLoader(showItinerary ? trip?.id : null);
+
+  
+  if (loading) return <div>Loading trip...</div>;
+  if (error) return <div>Error loading trip.</div>;
+  const toggleItinerary = () => {
+    setShowItinerary((prev) => !prev);
   };
 
   return (
@@ -65,23 +74,12 @@ function TripCard({ trip_id }) {
               className="bi bi-currency-dollar me-2"
               viewBox="0 0 16 16"
             >
-              <path
-                d="M8.5 4.5a.5.5 0 0 0-1 0v.635c-.712.097-1.428.26-2.07.488-.41.154-.79.34-1.13.554V6a.5.5 0 0 0 1 0v-.545c.34-.204.708-.36 1.11-.474.642-.23 1.358-.39 2.07-.487V7H6a.5.5 0 0 0 0 1h2v3H6a.5.5 0 0 0 0 1 0-1h1.5v-.635c.712-.097 1.428-.26 2.07-.488.41-.154.79-.34 1.13-.554V10a.5.5 0 0 0-1 0v.545c-.34.204-.708.36-1.11.474-.642.23-1.358.39-2.07.487V9H10a.5.5 0 0 0 0-1H8V5h2a.5.5 0 0 0 0-1H8.5V4.5z"
-              />
+              <path d="M8 1c-.552 0-1 .448-1 1v1.071C5.127 3.39 3.39 5.127 3.071 7H2a1 1 0 1 0 0 2h1.071c.319 1.873 2.056 3.61 3.929 3.929V14a1 1 0 1 0 2 0v-1.071c1.873-.319 3.61-2.056 3.929-3.929H14a1 1 0 1 0 0-2h-1.071c-.319-1.873-2.056-3.61-3.929-3.929V2a1 1 0 0 0-1-1zM8 5c1.105 0 2 .895 2 2s-.895 2-2 2-2-.895-2-2 .895-2 2-2z"/>
             </svg>
-            <span>Budget: ${trip.budget}</span>
-          </div>
+            <span>Budget: ${(trip.estimated_budget) || 0}</span>
+            
 
-          {/* New Fields */}
-          {/* <div className="d-flex align-items-center mb-2">
-            <strong>Status:</strong> <span className="ms-2">{trip.status}</span>
           </div>
-          <div className="d-flex align-items-center mb-2">
-            <strong>Accommodation:</strong> <span className="ms-2">{trip.accommodation}</span>
-          </div>
-          <div className="d-flex align-items-center mb-2">
-            <strong>Itineraries:</strong> <span className="ms-2">{trip.itineraries.join(", ")}</span>
-          </div> */}
 
           <div className="d-flex justify-content-between align-items-center">
             {trip.booking_ref && (
@@ -90,6 +88,113 @@ function TripCard({ trip_id }) {
               </small>
             )}
           </div>
+
+          {/* Itinerary Toggle Button */}
+          <button
+            className="btn btn-rose mt-3"
+            onClick={toggleItinerary}
+            disabled={!trip}
+          >
+            {showItinerary ? "Hide Itinerary" : "View Itinerary"}
+          </button>
+          {console.log(itinerary)}
+          {showItinerary && (
+            <div className="mt-3">
+              {itineraryLoading && <p>Loading Itinerary...</p>}
+              {itineraryError && (
+                <p className="text-danger">Error loading itinerary.</p>
+              )}
+              {!itineraryLoading && itinerary && itinerary.length > 0 && (
+                <div className="accordion" id={`accordion-${itinerary}`}>
+                  {itinerary.map((day, index) => (
+                    <div className="accordion-item" key={index}>
+                      <h2 className="accordion-header" id={`heading-${itinerary}-${index}`}>
+                        <button
+                          className={`accordion-button ${
+                            index > 0 ? "collapsed" : ""
+                          }`}
+                          type="button"
+                          data-bs-toggle="collapse"
+                          data-bs-target={`#collapse-${itinerary.trip_id}-${index}`}
+                          aria-expanded={index === 0 ? "true" : "false"}
+                          aria-controls={`collapse-${trip.trip_id}-${index}`}
+                        >
+                          Day {index + 1} - {day.date}
+                        </button>
+                      </h2>
+                      <div
+                        id={`collapse-${trip.trip_id}-${index}`}
+                        className={`accordion-collapse collapse ${
+                          index === 0 ? "show" : ""
+                        }`}
+                        aria-labelledby={`heading-${index}`}
+                        data-bs-parent={`#accordion-${trip.trip_id}`}
+                      >
+                        <div className="accordion-body">
+                         {/* // ... inside the accordion-body */}
+
+                          {day.activities_in_day && day.activities_in_day.length > 0 ? (
+                            <ul className="list-group">
+                              {day.activities_in_day.map((activity, idx) => (
+                                <li className="list-group-item activity-item" key={idx}>
+                                  <div className="d-flex justify-content-between align-items-start flex-wrap">
+                                    {/* Section 1: Title, Category, and Status */}
+                                    <div className="activity-main-info me-3">
+                                      <h5 className="mb-1 activity-title">
+                                        {activity.title}
+                                        <span className={`badge ms-2 ${activity.is_completed ? 'bg-success' : 'bg-warning text-dark'}`}>
+                                          {activity.is_completed ? 'Completed' : 'Pending'}
+                                        </span>
+                                      </h5>
+                                      <p className="activity-category">
+                                        <i className="bi bi-tag-fill me-1"></i>
+                                        {activity.category}
+                                      </p>
+                                    </div>
+
+                                    {/* Section 2: Time and Location */}
+                                    {console.log(activity.start_time)}
+                                    <div className="activity-details text-end">
+                                     <p className="activity-time fw-bold text-primary mb-0">
+                                        {formatTime(day.Date, activity.start_time)} - {formatTime(day.Date, activity.end_time)}
+                                      </p>
+                                      {activity.location && (
+                                        <p className="mb-0 text-secondary activity-location">
+                                          <i className="bi bi-geo-alt-fill me-1"></i>
+                                          {activity.location}
+                                        </p>
+                                      )}
+                                      {activity.cost && (
+                                        <p className="mb-0 text-info activity-cost">
+                                          Cost: ${activity.cost}
+                                        </p>
+                                      )}
+                                    </div>
+                                  </div>
+
+                                  {/* Section 3: Notes (optional, displays on a new line) */}
+                                  {activity.notes && (
+                                    <small className="text-break mt-2 d-block activity-notes">
+                                      **Notes:** {activity.notes}
+                                    </small>
+                                  )}
+                                </li>
+                              ))}
+                            </ul>
+                            ) : (
+                            <p>No activities planned for this day.</p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )} 
+              {!itineraryLoading && itinerary && itinerary.length === 0 && (
+                <p>No itinerary available for this trip.</p>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>

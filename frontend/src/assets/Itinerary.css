@@ -1,0 +1,71 @@
+/* Custom CSS for Itinerary Activities */
+
+/* 1. Base Item Styling */
+.activity-item {
+  /* Using the rose color from your React component for the highlight */
+  border-left: 5px solid #ffd6e8; 
+  margin-bottom: 12px; 
+  padding: 15px; 
+  list-style: none; /* Ensure no default list style (if it's a <ul>) */
+}
+
+/* 2. Main Info Section (Title & Category) */
+.activity-main-info {
+  flex-grow: 1; 
+  min-width: 50%; 
+  /* ADD: Use flexbox here to align the title/badge and category */
+  display: flex;
+  flex-direction: column;
+}
+
+/* Style the title (ACT1 + Pending Badge) */
+.activity-title {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #333;
+  /* ADD: Ensure title and badge are on the same line and center-aligned */
+  display: flex;
+  align-items: center; 
+  margin-bottom: 0.25rem !important; /* Tighten up space to category */
+}
+
+/* Style the details section (Time, Location, Cost) */
+.activity-details {
+  /* Remove white-space: nowrap; if you want the details to wrap naturally */
+  text-align: right; 
+}
+
+/* Tighten spacing for details */
+.activity-location, .activity-cost {
+  font-size: 0.85rem;
+  margin-bottom: 0; /* Remove unnecessary bottom margin */
+  line-height: 1.4; /* Set a consistent line height */
+}
+
+/* 3. Category Style (muesuem) */
+.activity-category {
+  font-style: italic;
+  font-size: 0.9rem;
+  /* ADD: Set color to match the subtle look */
+  color: #6c757d !important; 
+  margin-bottom: 0;
+}
+
+/* 4. Notes Section */
+.activity-notes {
+  border-top: 1px dashed #ddd;
+  margin-top: 10px; /* Add space above the dashed line */
+  padding-top: 5px;
+}
+
+/* 5. Media Query for Small Screens */
+@media (max-width: 576px) {
+  .activity-main-info {
+    min-width: 100%; 
+    margin-bottom: 8px; /* Slightly more space before details stack */
+  }
+  .activity-details {
+    text-align: left; 
+    width: 100%;
+  }
+}

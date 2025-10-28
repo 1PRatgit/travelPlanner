@@ -109,10 +109,10 @@ class Activity(Base):
     end_time = Column(Time)    # Using DateTime as it includes time
     notes = Column(Text)
     is_completed = Column(Boolean, default=False)
-    activity_date = Column(Date)   # Changed from datetime to Date as it's just a date
+    activity_date = Column(Date)   
     cost = Column(Float)
     created_at = Column(
-    DateTime(timezone=True), # Correctly sets the 'timezone' keyword argument
+    DateTime(timezone=True), 
     default=lambda: datetime.now(timezone.utc) # Ensures the default value is offset-aware UTC
     )
     updated_at = Column(
