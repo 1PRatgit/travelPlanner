@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useTripLoader } from "../../hooks/useTripLoader";
 import { useItineraryLoader } from "../../hooks/useItineraryLoader";
 import {formatTime,formatDate} from "../../utils/utils"
+import { ItineraryCreate } from "../tripForm/ItineraryCreate";
 
 function TripCard({ trip_id }) {
   const { trip, loading, error, loadTrip } = useTripLoader(trip_id);
@@ -191,7 +192,11 @@ function TripCard({ trip_id }) {
                 </div>
               )} 
               {!itineraryLoading && itinerary && itinerary.length === 0 && (
+                <div>
                 <p>No itinerary available for this trip.</p>
+                <p>create Itinerary</p>
+                <ItineraryCreate trip_id= {trip.id}/>
+                </div>
               )}
             </div>
           )}

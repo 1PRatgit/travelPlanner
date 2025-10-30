@@ -1,6 +1,7 @@
 import React from 'react';
 import { useState,useEffect } from 'react';
 import TripCreate from './tripForm/TripCreate';
+import { ItineraryCreate } from './tripForm/ItineraryCreate';
 export default function NavBar() {
   const [showModal, setShowModal] = useState(false);
 
@@ -60,6 +61,9 @@ export default function NavBar() {
           <ul className="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center">
             <li className="nav-item me-3">
               <a className="nav-link" href="/mytrips">MyTrips</a>
+            </li>
+            <li>
+              <ItineraryCreate trip_id={2}/>
             </li>
               {/* New Trip Button */}
               <li className="nav-item me-3">

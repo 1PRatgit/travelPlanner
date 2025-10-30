@@ -42,7 +42,7 @@ export function useTripCreate({onTripCreated}) {
         estimated_budget: "",
         notes: "",
       });
-      if (onTripCreated) onTripCreated(response.data);
+      if (onTripCreated) onTripCreated(response.data); //call back function to set form data 
     } catch (error) {
       console.error("Error creating trip:", error);
       setMessage({
