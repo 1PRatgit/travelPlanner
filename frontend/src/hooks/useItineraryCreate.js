@@ -29,8 +29,8 @@ export function useItineraryCreate({onItineraryCreated, trip_id}){
         const payload = {...formData,};
 
         try{
-
-        const response = await api.post(`/itineraries/trips/${trip_id}`,payload);
+        console.log(trip_id)
+        const response = await api.post(`/itineraries/trips/13/`,payload);
         console.log("Creating itinery", response.data);
         // Reset form data after success
             setFormData({

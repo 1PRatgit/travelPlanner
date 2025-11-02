@@ -6,20 +6,59 @@ import { ItineraryCreate } from "../tripForm/ItineraryCreate";
 
 function TripCard({ trip_id }) {
   const { trip, loading, error, loadTrip } = useTripLoader(trip_id);
-  const [showItinerary, setShowItinerary] = useState(false);
+  const [showItineraryViewer, setShowItineraryViewer] = useState(false);
+  const [showItineraryForm, setShowItineraryForm] = useState(false);
 
   const {
-    itinerary,
-    itineraryLoading,
-    error: itineraryError, 
-  } = useItineraryLoader(showItinerary ? trip?.id : null);
+  itinerary,
+  itineraryLoading,
+  error: itineraryError, 
+ } = useItineraryLoader(trip?.id);
 
   
   if (loading) return <div>Loading trip...</div>;
   if (error) return <div>Error loading trip.</div>;
-  const toggleItinerary = () => {
-    setShowItinerary((prev) => !prev);
+  const toggleItineraryViewer = () => {
+    // When showing the viewer, hide the form
+    if (!showItineraryViewer) setShowItineraryForm(false);
+    setShowItineraryViewer((prev) => !prev);
   };
+  const toggleItineraryForm = () => {
+    // When showing the form, hide the viewer
+    if (!showItineraryForm) setShowItineraryViewer(false);
+    setShowItineraryForm((prev) => !prev);
+  };
+  const itineraryExists = !itineraryLoading && itinerary && itinerary.length > 0;
+ 
+  let buttonText;
+  let buttonAction;
+  let buttonDisabled = !trip; // Default disable state
+
+  if (itineraryLoading) {
+  buttonText = "Loading Itinerary...";
+  buttonAction = () => {};
+  buttonDisabled = true;
+  } else if (showItineraryForm) {
+  // If form is open, button should close it
+  buttonText = "Close Form";
+  buttonAction = toggleItineraryForm;
+  } else if (itineraryExists) {
+  // Itinerary exists, so button toggles the viewer
+  if (showItineraryViewer) {
+    buttonText = "Hide Itinerary";
+    buttonAction = toggleItineraryViewer;
+  } else {
+    buttonText = "Show Itinerary";
+    buttonAction = toggleItineraryViewer;
+  }
+  } else {
+  // No itinerary exists — allow creating one
+  buttonText = "Create Itinerary";
+  buttonAction = toggleItineraryForm;
+  }
+
+
+  const accordionId = `accordion-${trip.id}`;
 
   return (
     <div className="card shadow-sm mb-3" style={{ borderColor: "#ffd6e8" }}>
@@ -93,46 +132,83 @@ function TripCard({ trip_id }) {
           {/* Itinerary Toggle Button */}
           <button
             className="btn btn-rose mt-3"
-            onClick={toggleItinerary}
-            disabled={!trip}
+            onClick={buttonAction}
+            disabled={buttonDisabled}
           >
-            {showItinerary ? "Hide Itinerary" : "View Itinerary"}
+            {buttonText}
           </button>
-          {console.log(itinerary)}
-          {showItinerary && (
+
+          {/* 2. Create/Edit Itinerary Button */}
+          </div>
+          {/* Conditional Rendering for Itinerary Form (Create/Edit) */}
+          {showItineraryForm && trip &&(
             <div className="mt-3">
+              <h6 className="fw-bold mt-2">{itineraryExists ? "Edit Itinerary" : "Create Itinerary"} for {trip.title}</h6>
+              {console.log(trip.id)}
+              <ItineraryCreate 
+                trip_id={trip.id} 
+                existingItinerary={itineraryExists ? itinerary : null} 
+                // Optional: Pass a callback to close the form and/or reload data on success
+                onSuccess={() => {
+                  loadTrip(); // Reload trip data if necessary
+                  setShowItineraryForm(false); // Close the form
+                  setShowItineraryViewer(true); // Optionally show the viewer
+                }}
+              />
+            </div>
+          )}
+
+
+          {console.log(itinerary)}
+          {showItineraryViewer && itineraryExists && (
+            <div className="mt-3">
+              <div className="d-flex justify-content-between align-items-center">
+                  <h6 className="fw-bold"> Trip Itinerary</h6>
+                  <button 
+                      className="btn btn-sm btn-outline-secondary border-0" 
+                      onClick={toggleItineraryForm} 
+                      title="Edit Itinerary"
+                  >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-pencil-square" viewBox="0 0 16 16">
+                        <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
+                        <path fillRule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"/>
+                      </svg>
+                  </button>
+              </div>
               {itineraryLoading && <p>Loading Itinerary...</p>}
               {itineraryError && (
                 <p className="text-danger">Error loading itinerary.</p>
               )}
               {!itineraryLoading && itinerary && itinerary.length > 0 && (
-                <div className="accordion" id={`accordion-${itinerary}`}>
-                  {itinerary.map((day, index) => (
+                <div className="accordion" id={accordionId}>
+                  {itinerary.map((day, index) => {
+                    const collapseId = `collapse-${trip.id}-${index}`; // Unique ID for collapse
+                    const headingId = `heading-${trip.id}-${index}`; // Unique ID for heading
+                    return(
                     <div className="accordion-item" key={index}>
-                      <h2 className="accordion-header" id={`heading-${itinerary}-${index}`}>
+                      <h2 className="accordion-header" id={headingId}>
                         <button
                           className={`accordion-button ${
                             index > 0 ? "collapsed" : ""
                           }`}
                           type="button"
                           data-bs-toggle="collapse"
-                          data-bs-target={`#collapse-${itinerary.trip_id}-${index}`}
+                          data-bs-target={`#${collapseId}`}
                           aria-expanded={index === 0 ? "true" : "false"}
-                          aria-controls={`collapse-${trip.trip_id}-${index}`}
+                          aria-controls={collapseId}
                         >
                           Day {index + 1} - {day.date}
                         </button>
                       </h2>
                       <div
-                        id={`collapse-${trip.trip_id}-${index}`}
+                        id={collapseId}
                         className={`accordion-collapse collapse ${
                           index === 0 ? "show" : ""
                         }`}
-                        aria-labelledby={`heading-${index}`}
-                        data-bs-parent={`#accordion-${trip.trip_id}`}
+                        aria-labelledby={headingId}
+                        data-bs-parent={`#${accordionId}`}
                       >
                         <div className="accordion-body">
-                         {/* // ... inside the accordion-body */}
 
                           {day.activities_in_day && day.activities_in_day.length > 0 ? (
                             <ul className="list-group">
@@ -188,21 +264,14 @@ function TripCard({ trip_id }) {
                         </div>
                       </div>
                     </div>
-                  ))}
+                    )
+                })}
                 </div>
               )} 
-              {!itineraryLoading && itinerary && itinerary.length === 0 && (
-                <div>
-                <p>No itinerary available for this trip.</p>
-                <p>create Itinerary</p>
-                <ItineraryCreate trip_id= {trip.id}/>
-                </div>
-              )}
             </div>
           )}
         </div>
       </div>
-    </div>
   );
 }
 

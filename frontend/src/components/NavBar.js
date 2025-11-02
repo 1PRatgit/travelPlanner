@@ -62,9 +62,6 @@ export default function NavBar() {
             <li className="nav-item me-3">
               <a className="nav-link" href="/mytrips">MyTrips</a>
             </li>
-            <li>
-              <ItineraryCreate trip_id={2}/>
-            </li>
               {/* New Trip Button */}
               <li className="nav-item me-3">
                 <button

@@ -11,7 +11,7 @@ router = APIRouter(prefix="/itineraries", tags=["itineraries"])
 ItineraryModel = models.Itinerary
 
 
-@router.post("/trips/{trip_id}/itineraries/", response_model=ItineraryDay, status_code=status.HTTP_201_CREATED)
+@router.post("/trips/{trip_id}/", response_model=ItineraryDay, status_code=status.HTTP_201_CREATED)
 async def create_itinerary(
     trip_id: int,
     itinerary_data: ItineraryDayCreate, 
@@ -20,7 +20,7 @@ async def create_itinerary(
     # 1. Create the Itinerary Day record
     # Use only the fields from the ItineraryDayBase part of the model
     db_itinerary = ItineraryModel(**itinerary_data.model_dump(
-        exclude={'activities','accommodations'} # Exclude related lists/objects
+        exclude=['activities_in_day'] # Exclude related lists/objects
     ), trip_id=trip_id)
     db.add(db_itinerary)
     

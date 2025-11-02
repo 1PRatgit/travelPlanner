@@ -62,7 +62,7 @@ export function ItineraryCreate(onItineraryCreated, trip_id){ //understand this 
             </div>
             {/* Transport ID */}
             <div className="col-md-4 mb-3">
-              <label className="form-label fw-semibold">Transport ID</label>
+              <label className="form-label fw-semibold">Transportation</label>
               <input
                 type="number"
                 className="form-control"
