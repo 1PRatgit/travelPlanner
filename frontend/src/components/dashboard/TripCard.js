@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import { useTripLoader } from "../../hooks/useTripLoader";
 import { useItineraryLoader } from "../../hooks/useItineraryLoader";
 import {formatTime,formatDate} from "../../utils/utils"
@@ -19,7 +19,6 @@ function TripCard({ trip_id }) {
   if (loading) return <div>Loading trip...</div>;
   if (error) return <div>Error loading trip.</div>;
   const toggleItineraryViewer = () => {
-    // When showing the viewer, hide the form
     if (!showItineraryViewer) setShowItineraryForm(false);
     setShowItineraryViewer((prev) => !prev);
   };
@@ -147,7 +146,7 @@ function TripCard({ trip_id }) {
               {console.log(trip.id)}
               <ItineraryCreate 
                 trip_id={trip.id} 
-                existingItinerary={itineraryExists ? itinerary : null} 
+                // onItineraryCreated={itineraryExists ? itinerary : null} 
                 // Optional: Pass a callback to close the form and/or reload data on success
                 onSuccess={() => {
                   loadTrip(); // Reload trip data if necessary

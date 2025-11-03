@@ -5,7 +5,7 @@ from sqlalchemy.orm import selectinload
 from typing import List
 from db.db import get_async_session
 from db import models
-from schemas.schemas import ItineraryDayCreate, ItineraryDay, ActivityCreate, AccommodationCreate
+from schemas.schemas import ItineraryDayCreate, ItineraryDay, ItineraryDayUpdate,ActivityCreate, AccommodationCreate
 
 router = APIRouter(prefix="/itineraries", tags=["itineraries"])
 ItineraryModel = models.Itinerary
@@ -110,6 +110,59 @@ async def list_itineraries(skip: int = 0, limit: int = 100, db: AsyncSession = D
     )
     return result.scalars().all()
 
+#***** To update an itinerary *****
+@router.patch("/{itinerary_id}", response_model=ItineraryDay, status_code=status.HTTP_200_OK)
+async def patch_itinerary(
+    itinerary_id: int, 
+    itinerary_data: ItineraryDayUpdate, # Use the partial update schema
+    db: AsyncSession = Depends(get_async_session)
+    ):
+    
+    # 1. Find the existing Itinerary Day
+    result = await db.execute(
+        select(ItineraryModel)
+        .filter_by(id=itinerary_id)
+        .options(selectinload(ItineraryModel.activities_in_day))
+    )
+    db_itinerary = result.scalars().first()
+    
+    if not db_itinerary:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Itinerary not found")
+
+    # 2. Update basic Itinerary fields only if provided
+    # model_dump(exclude_unset=True) is key: it skips fields not provided by the user
+    update_data = itinerary_data.model_dump(exclude_unset=True)
+    
+    if not update_data:
+        # If the user sends an empty body, just return the existing object
+        return db_itinerary
+
+    for key, value in update_data.items():
+        setattr(db_itinerary, key, value)
+    
+    # 3. Commit and Reload
+    try:
+        await db.commit()
+        await db.refresh(db_itinerary)
+    except Exception as e:
+        await db.rollback()
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to partially update itinerary day.")
+
+    # 4. Reload the itinerary with relationships (Crucial for the correct response_model)
+    result = await db.execute(
+        select(ItineraryModel)
+        .filter_by(id=db_itinerary.id)
+        .options(
+            selectinload(ItineraryModel.activities_in_day),
+            selectinload(ItineraryModel.trip),
+        )
+    )
+    itinerary_with_rels = result.scalars().first()
+    return itinerary_with_rels
+
+# ... (existing delete_itinerary endpoint)
+
+    
 #***** To delete an itinerary *****
 @router.delete("/{itinerary_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_itinerary(itinerary_id: int, db: AsyncSession = Depends(get_async_session)):

@@ -76,6 +76,14 @@ class ItineraryDay(ItineraryDayBase):
     class Config:
         from_attributes= True 
 
+# ******* Itinerary Update Schema *******
+
+class ItineraryDayUpdate(BaseModel):
+    """Schema for patching/partially updating an Itinerary Day's core details."""
+    day_number: Optional[int] = None
+    Date: Optional[date] = None 
+    transport_id: Optional[int] = None
+
 # ******* Activity Schemas *******
 
 class ActivityBase(BaseModel):
@@ -97,6 +105,18 @@ class Activity(ActivityBase):
     # itinerary_id: int
     class Config:
         from_attributes= True
+        
+# ******* Activity Update Schemas *******
+class ActivityUpdate(ActivityBase):
+    title: Optional[str] = Field(None, max_length=255)
+    category: Optional[str] = Field(None, max_length=50)
+    start_time: Optional[time] = None
+    end_time: Optional[time] = None
+    location: Optional[str] = Field(None, max_length=255)
+    notes: Optional[str] = None
+    is_completed: Optional[bool] = None
+    activity_date: Optional[date] = None
+    cost: Optional[float] = None
 
 # ******* User Schemas *******  
 class UserBase(BaseModel):

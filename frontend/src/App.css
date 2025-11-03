@@ -140,3 +140,32 @@
 .modal.show .modal-dialog {
   transform: translateY(0);
 }
+
+/* For delete button */
+.btn-rose {
+  background: linear-gradient(90deg, #ff6fb5, #ff4e9e);
+  color: white;
+  border: none;
+  box-shadow: 0 2px 6px rgba(255, 82, 147, 0.18);
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.btn-rose:hover {
+  filter: brightness(0.95);
+}
+
+/* 👇 Specifically for icon-only buttons */
+.btn-icon {
+  width: 46px;         /* same height as the text button */
+  height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.btn-icon i {
+  font-size: 1.2rem;   /* clean icon size */
+}
+

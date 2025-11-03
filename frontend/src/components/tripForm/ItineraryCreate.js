@@ -1,5 +1,5 @@
 import { useItineraryCreate } from "../../hooks/useItineraryCreate";
-export function ItineraryCreate(onItineraryCreated, trip_id){ //understand this ****** on...created
+export function ItineraryCreate({ onItineraryCreated, onSuccess, trip_id }){ //understand this ****** on...created
     const { 
         formData, 
         loading, 
@@ -9,7 +9,7 @@ export function ItineraryCreate(onItineraryCreated, trip_id){ //understand this 
         handleActivityChange, 
         handleRemoveActivity, 
         createNewItinerary 
-    } = useItineraryCreate({ onItineraryCreated, trip_id });
+    } = useItineraryCreate({ onItineraryCreated: onSuccess ?? onItineraryCreated, trip_id });
 
     const handleSubmit = (e) => {
         e.preventDefault();

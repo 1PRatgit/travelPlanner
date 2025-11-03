@@ -30,8 +30,15 @@ export function useItineraryCreate({onItineraryCreated, trip_id}){
 
         try{
         console.log(trip_id)
-        const response = await api.post(`/itineraries/trips/13/`,payload);
+        const response = await api.post(`/itineraries/trips/${trip_id}/`,payload);
         console.log("Creating itinery", response.data);
+          setTimeout(() => {
+            if (onItineraryCreated) {
+            onItineraryCreated(response.data);  // ✅ will now call TripCard’s onSuccess
+            }
+        }, 1500);
+
+        setMessage({ type: "success", text: "Itinerary created successfully!" });
         // Reset form data after success
             setFormData({
                 day_number: formData.day_number + 1, // Suggest next day number
@@ -41,6 +48,7 @@ export function useItineraryCreate({onItineraryCreated, trip_id}){
                     { title: "", category: "", start_time: "", end_time: "", location: "", notes: "", is_completed: false, activity_date: "", cost: 0 },
                 ],
             });
+          
         }catch{
             console.error("Error creating itinerary:");
             setMessage({

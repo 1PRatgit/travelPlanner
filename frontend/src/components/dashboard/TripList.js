@@ -2,11 +2,15 @@ import React, { useEffect } from "react";
 import { useState } from "react";
 import api from "../../api/axiosInstance";
 import TripCard from "./TripCard";
+import useTripDelete from "../../hooks/useTripDelete";
+
 
 
 export default function TripList({}) {
     const[getTrips, setGetTrips] = useState([])
     const [selectedTripId, setSelectedTripId] = useState(null); // <-- new state
+
+    const {deleteTrip,message} = useTripDelete();
 
      const onViewDetails =async ()=>{
         try {
@@ -60,6 +64,14 @@ export default function TripList({}) {
         );
     }
 
+    const handleDeleteTrip = async (trip_id) => {
+    const confirmDelete = window.confirm("Are you sure you want to delete this trip?");
+    if (!confirmDelete) return;
+
+    await deleteTrip(trip_id);
+    await onViewDetails(); // ✅ Refresh list after deletion
+  };
+
     return (
         <div className="container-fluid px-0">
             {getTrips.map((t) => (
@@ -68,13 +80,25 @@ export default function TripList({}) {
                         <div className="card-body d-flex justify-content-between align-items-center">
                             <h5 className="card-title mb-0">{t.title}</h5>
                             <div>
-                                <button
-                                    type="button"
-                                    className="btn btn-rose"
-                                    onClick={() => handleSelectTrip(t.id)}
-                                >
-                                    {selectedTripId === t.id ? "Hide Details" : "View Details"}
-                                </button>
+                              <div className="d-flex gap-2">
+                                    <button
+                                        type="button"
+                                        className="btn btn-rose"
+                                        onClick={() => handleSelectTrip(t.id)}
+                                    >
+                                        {selectedTripId === t.id ? "Hide Details" : "View Details"}
+                                    </button>
+                                     <button
+                                        type="button"
+                                        className="btn btn-rose btn-icon"
+                                        onClick={() => handleDeleteTrip(t.id)}
+                                        title="Delete Trip"
+                                    >
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash-fill" viewBox="0 0 16 16">
+                                        <path d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5M8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5m3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0"/>
+                                    </svg>
+                                    </button>
+                                </div>
                             </div>
                             
                         </div>
