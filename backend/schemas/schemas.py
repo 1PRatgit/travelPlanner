@@ -101,7 +101,7 @@ class ActivityCreate(ActivityBase):
     pass
 
 class Activity(ActivityBase):
-    # id: int
+    id: int
     # itinerary_id: int
     class Config:
         from_attributes= True

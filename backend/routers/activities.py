@@ -5,7 +5,7 @@ from sqlalchemy.orm import selectinload
 from typing import List
 from db.db import get_async_session
 from db import models
-from schemas.schemas import ActivityCreate, Activity
+from schemas.schemas import ActivityCreate, Activity, ActivityUpdate
 
 router = APIRouter(prefix = "/activities", tags=["activities"])
 
@@ -47,12 +47,28 @@ async def list_activities_for_day(itinerary_id: int, db: AsyncSession = Depends(
         # raise HTTPException(status_code=404, detail="Itinerary day not found")
     return activities
 
-# ***** To get a all activity by itinerary_id *****
-@router.get("/{Activity_id}", response_model=Activity)
-async def get_activity(itinerary_id: int, db: AsyncSession = Depends(get_async_session)):
+# # ***** To get a all activity by itinerary_id *****
+# @router.get("/{activity_id}", response_model=Activity)
+# async def get_activity(itinerary_id: int, db: AsyncSession = Depends(get_async_session)):
+#     result = await db.execute(
+#         select(models.Activity)
+#         .filter_by(id=itinerary_id)
+#         .options(
+#             selectinload(models.Activity.itinerary),
+#         )
+#     )
+#     activity = result.scalars().first()
+#     if not activity:
+#         raise HTTPException(status_code=404, detail="Activity not found")
+        
+#     return activity 
+
+# ***** To get a specific activity by activities_id *****
+@router.get("/{activity_id}", response_model=Activity)
+async def get_activity(activity_id: int, db: AsyncSession = Depends(get_async_session)):
     result = await db.execute(
         select(models.Activity)
-        .filter_by(id=itinerary_id)
+        .filter_by(id=activity_id)
         .options(
             selectinload(models.Activity.itinerary),
         )
@@ -62,18 +78,8 @@ async def get_activity(itinerary_id: int, db: AsyncSession = Depends(get_async_s
         raise HTTPException(status_code=404, detail="Activity not found")
         
     return activity 
-
-# ... (existing imports)
-
-# Update the import to include ActivityUpdate
-from schemas.schemas import ActivityCreate, Activity, ActivityUpdate # <-- Added ActivityUpdate (to be defined in schemas) 
-
-router = APIRouter(prefix = "/activities", tags=["activities"])
-
-# ... (existing endpoints like create_activity, list_activities_for_day, get_activity)
-
 # ***** To update a specific activity by ID *****
-@router.put("/{activity_id}", response_model=Activity, status_code=status.HTTP_200_OK)
+@router.patch("/{activity_id}", response_model=Activity, status_code=status.HTTP_200_OK)
 async def update_activity(
     activity_id: int, 
     activity_data: ActivityUpdate, 

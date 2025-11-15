@@ -1,23 +1,40 @@
-import { useState,useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useTripLoader } from "../../hooks/useTripLoader";
 import { useItineraryLoader } from "../../hooks/useItineraryLoader";
-import {formatTime,formatDate} from "../../utils/utils"
+import { formatTime, formatDate } from "../../utils/utils";
 import { ItineraryCreate } from "../tripForm/ItineraryCreate";
+import { useUpdateActivity } from "../../hooks/useUpdateActivity";
+// import { useUpdateItinerary } from "../../hooks/useUpdateItinerary";
+import { ItineraryEdit } from "../tripForm/ItineraryEdit";
+import { ActivityCard } from "./ActivityCard";
+import ActivityEdit from "../tripForm/ActivityEdit";
 
 function TripCard({ trip_id }) {
   const { trip, loading, error, loadTrip } = useTripLoader(trip_id);
+
   const [showItineraryViewer, setShowItineraryViewer] = useState(false);
   const [showItineraryForm, setShowItineraryForm] = useState(false);
 
-  const {
-  itinerary,
-  itineraryLoading,
-  error: itineraryError, 
- } = useItineraryLoader(trip?.id);
+  const { updateActivity, loading: updatingActivity } = useUpdateActivity();
+  // const { updateItinerary, loading: updatingItinerary} = useUpdateItinerary();
 
-  
+  const [editingActivity, setEditingActivity] = useState(null);
+  const [localItinerary, setLocalItinerary] = useState([]);
+
+  const {
+    itinerary,
+    itineraryLoading,
+    error: itineraryError,
+  } = useItineraryLoader(trip?.id);
+
+  // **Hook must run before any early return**
+  useEffect(() => {
+    setLocalItinerary(itinerary ?? []);
+  }, [itinerary]);
+
   if (loading) return <div>Loading trip...</div>;
   if (error) return <div>Error loading trip.</div>;
+
   const toggleItineraryViewer = () => {
     if (!showItineraryViewer) setShowItineraryForm(false);
     setShowItineraryViewer((prev) => !prev);
@@ -27,39 +44,74 @@ function TripCard({ trip_id }) {
     if (!showItineraryForm) setShowItineraryViewer(false);
     setShowItineraryForm((prev) => !prev);
   };
-  const itineraryExists = !itineraryLoading && itinerary && itinerary.length > 0;
- 
+  const itineraryExists =
+    !itineraryLoading && itinerary && itinerary.length > 0;
+
   let buttonText;
   let buttonAction;
   let buttonDisabled = !trip; // Default disable state
 
   if (itineraryLoading) {
-  buttonText = "Loading Itinerary...";
-  buttonAction = () => {};
-  buttonDisabled = true;
+    buttonText = "Loading Itinerary...";
+    buttonAction = () => {};
+    buttonDisabled = true;
   } else if (showItineraryForm) {
-  // If form is open, button should close it
-  buttonText = "Close Form";
-  buttonAction = toggleItineraryForm;
+    // If form is open, button should close it
+    buttonText = "Close Form";
+    buttonAction = toggleItineraryForm;
   } else if (itineraryExists) {
-  // Itinerary exists, so button toggles the viewer
-  if (showItineraryViewer) {
-    buttonText = "Hide Itinerary";
-    buttonAction = toggleItineraryViewer;
+    // Itinerary exists, so button toggles the viewer
+    if (showItineraryViewer) {
+      buttonText = "Hide Itinerary";
+      buttonAction = toggleItineraryViewer;
+    } else {
+      buttonText = "Show Itinerary";
+      buttonAction = toggleItineraryViewer;
+    }
   } else {
-    buttonText = "Show Itinerary";
-    buttonAction = toggleItineraryViewer;
-  }
-  } else {
-  // No itinerary exists — allow creating one
-  buttonText = "Create Itinerary";
-  buttonAction = toggleItineraryForm;
+    // No itinerary exists — allow creating one
+    buttonText = "Create Itinerary";
+    buttonAction = toggleItineraryForm;
   }
 
+  // **Hook must run before any early return**
+  // useEffect(() => {
+  //   setLocalItinerary(itinerary ?? []);
+  // }, [itinerary]);
+
+  // async function submitEditActivity(payload) {
+  //   if (editingActivity?.id) {
+  //     console.error("Missing activity id");
+  //     return;
+  //   }
+  //   try {
+  //     await updateActivity(editingActivity.id, payload);
+  //     await loadTrip();
+  //     setEditingActivity(null);
+  //   } catch (e) {
+  //     console.error("Failed to update activity", e);
+  //   }
+  // }
+
+  // async function submitEditItinerary(payload) {
+  //   if (!editingItinerary?.id) {
+  //     console.error("Missing Itinerary id");
+  //     return;
+  //   }
+  //   try {
+  //     // call the update function from your hook
+  //     await updateItinerary(editingItinerary.id, payload);
+  //     await loadTrip();
+  //     setEditingItinerary(null);
+  //   } catch (e) {
+  //     console.error("Failed to update Itinerary", e);
+  //   }
+  // }
 
   const accordionId = `accordion-${trip.id}`;
 
   return (
+    // <>
     <div className="card shadow-sm mb-3" style={{ borderColor: "#ffd6e8" }}>
       <div className="card-body">
         <div className="d-flex justify-content-between align-items-start mb-2">
@@ -113,11 +165,9 @@ function TripCard({ trip_id }) {
               className="bi bi-currency-dollar me-2"
               viewBox="0 0 16 16"
             >
-              <path d="M8 1c-.552 0-1 .448-1 1v1.071C5.127 3.39 3.39 5.127 3.071 7H2a1 1 0 1 0 0 2h1.071c.319 1.873 2.056 3.61 3.929 3.929V14a1 1 0 1 0 2 0v-1.071c1.873-.319 3.61-2.056 3.929-3.929H14a1 1 0 1 0 0-2h-1.071c-.319-1.873-2.056-3.61-3.929-3.929V2a1 1 0 0 0-1-1zM8 5c1.105 0 2 .895 2 2s-.895 2-2 2-2-.895-2-2 .895-2 2-2z"/>
+              <path d="M8 1c-.552 0-1 .448-1 1v1.071C5.127 3.39 3.39 5.127 3.071 7H2a1 1 0 1 0 0 2h1.071c.319 1.873 2.056 3.61 3.929 3.929V14a1 1 0 1 0 2 0v-1.071c1.873-.319 3.61-2.056 3.929-3.929H14a1 1 0 1 0 0-2h-1.071c-.319-1.873-2.056-3.61-3.929-3.929V2a1 1 0 0 0-1-1zM8 5c1.105 0 2 .895 2 2s-.895 2-2 2-2-.895-2-2 .895-2 2-2z" />
             </svg>
-            <span>Budget: ${(trip.estimated_budget) || 0}</span>
-            
-
+            <span>Budget: ${trip.estimated_budget || 0}</span>
           </div>
 
           <div className="d-flex justify-content-between align-items-center">
@@ -138,66 +188,98 @@ function TripCard({ trip_id }) {
           </button>
 
           {/* 2. Create/Edit Itinerary Button */}
+        </div>
+        {/* Conditional Rendering for Itinerary Form (Create/Edit) */}
+        {showItineraryForm && trip && (
+          <div className="mt-3">
+            <h6 className="fw-bold mt-2">
+              {itineraryExists ? "Edit Itinerary" : "Create Itinerary"} for{" "}
+              {trip.title}
+            </h6>
+            {console.log(trip.id)}
+            <ItineraryCreate
+              trip_id={trip.id}
+              // onItineraryCreated={itineraryExists ? itinerary : null}
+              // Optional: Pass a callback to close the form and/or reload data on success
+              onSuccess={() => {
+                loadTrip(); // Reload trip data if necessary
+                setShowItineraryForm(false); // Close the form
+                setShowItineraryViewer(true); // Optionally show the viewer
+              }}
+            />
           </div>
-          {/* Conditional Rendering for Itinerary Form (Create/Edit) */}
-          {showItineraryForm && trip &&(
-            <div className="mt-3">
-              <h6 className="fw-bold mt-2">{itineraryExists ? "Edit Itinerary" : "Create Itinerary"} for {trip.title}</h6>
-              {console.log(trip.id)}
-              <ItineraryCreate 
-                trip_id={trip.id} 
-                // onItineraryCreated={itineraryExists ? itinerary : null} 
-                // Optional: Pass a callback to close the form and/or reload data on success
-                onSuccess={() => {
-                  loadTrip(); // Reload trip data if necessary
-                  setShowItineraryForm(false); // Close the form
-                  setShowItineraryViewer(true); // Optionally show the viewer
-                }}
-              />
+        )}
+
+        {/* Itinerary viewer */}
+        {console.log(itinerary)}
+        {showItineraryViewer && itineraryExists && (
+          <div className="mt-3">
+            <div className="d-flex justify-content-between align-items-center">
+              <h6 className="fw-bold"> Trip Itinerary</h6>
+              <button
+                className="btn btn-sm btn-outline-secondary border-0"
+                onClick={toggleItineraryForm}
+                title="Edit Itinerary"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  fill="currentColor"
+                  className="bi bi-pencil-square"
+                  viewBox="0 0 16 16"
+                >
+                  <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z" />
+                  <path
+                    fillRule="evenodd"
+                    d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"
+                  />
+                </svg>
+              </button>
             </div>
-          )}
-
-
-          {console.log(itinerary)}
-          {showItineraryViewer && itineraryExists && (
-            <div className="mt-3">
-              <div className="d-flex justify-content-between align-items-center">
-                  <h6 className="fw-bold"> Trip Itinerary</h6>
-                  <button 
-                      className="btn btn-sm btn-outline-secondary border-0" 
-                      onClick={toggleItineraryForm} 
-                      title="Edit Itinerary"
-                  >
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-pencil-square" viewBox="0 0 16 16">
-                        <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
-                        <path fillRule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"/>
-                      </svg>
-                  </button>
-              </div>
-              {itineraryLoading && <p>Loading Itinerary...</p>}
-              {itineraryError && (
-                <p className="text-danger">Error loading itinerary.</p>
-              )}
-              {!itineraryLoading && itinerary && itinerary.length > 0 && (
-                <div className="accordion" id={accordionId}>
-                  {itinerary.map((day, index) => {
-                    const collapseId = `collapse-${trip.id}-${index}`; // Unique ID for collapse
-                    const headingId = `heading-${trip.id}-${index}`; // Unique ID for heading
-                    return(
-                    <div className="accordion-item" key={index}>
+            {itineraryLoading && <p>Loading Itinerary...</p>}
+            {itineraryError && (
+              <p className="text-danger">Error loading itinerary.</p>
+            )}
+            {!itineraryLoading && itinerary && itinerary.length > 0 && (
+              <div className="accordion" id={accordionId}>
+                {localItinerary.map((day, index) => {
+                  const activityId = day.id ?? null;
+                  const collapseId = `collapse-${trip.id}-${index}`; // Unique ID for collapse
+                  const headingId = `heading-${trip.id}-${index}`; // Unique ID for heading
+                  return (
+                    <div className="accordion-item" key={activityId}>
+                      {/* <div className="accordion-item" key={index}> */}
+                      {/* {console.log(activityId)} */}
                       <h2 className="accordion-header" id={headingId}>
-                        <button
-                          className={`accordion-button ${
-                            index > 0 ? "collapsed" : ""
-                          }`}
-                          type="button"
-                          data-bs-toggle="collapse"
-                          data-bs-target={`#${collapseId}`}
-                          aria-expanded={index === 0 ? "true" : "false"}
-                          aria-controls={collapseId}
-                        >
-                          Day {index + 1} - {day.date}
-                        </button>
+                        <div className="d-flex justify-content-between align-items-center w-100">
+                          <button
+                            className={`accordion-button ${
+                              index > 0 ? "collapsed" : ""
+                            }`}
+                            type="button"
+                            data-bs-toggle="collapse"
+                            data-bs-target={`#${collapseId}`}
+                            aria-expanded={index === 0 ? "true" : "false"}
+                            aria-controls={collapseId}
+                          >
+                            Day {index + 1} - {day.date}
+                          </button>
+                          {/* <div className="ms-2">
+                              <button
+                                className="btn btn-sm btn-outline-primary"
+                                // onClick={() => setEditingItinerary(day)}
+                                title="Edit Day"
+                                onClick={(e) => {
+                                e.stopPropagation();            // IMPORTANT: prevent parent accordion from handling this click
+                                console.log("Edit Day clicked for day:", day);
+                                setEditingItinerary(day);
+                              }}
+                              >
+                                Edit Itinerary
+                              </button>
+                            </div> */}
+                        </div>
                       </h2>
                       <div
                         id={collapseId}
@@ -208,69 +290,90 @@ function TripCard({ trip_id }) {
                         data-bs-parent={`#${accordionId}`}
                       >
                         <div className="accordion-body">
-
-                          {day.activities_in_day && day.activities_in_day.length > 0 ? (
+                          {/* {console.log(activityId)}
+                           {console.log(day.activities_in_day )} */}
+                          {/* inside the accordion-body where you have day.activities_in_day */}
+                          {day.activities_in_day &&
+                          day.activities_in_day.length > 0 ? (
                             <ul className="list-group">
-                              {day.activities_in_day.map((activity, idx) => (
-                                <li className="list-group-item activity-item" key={idx}>
-                                  <div className="d-flex justify-content-between align-items-start flex-wrap">
-                                    {/* Section 1: Title, Category, and Status */}
-                                    <div className="activity-main-info me-3">
-                                      <h5 className="mb-1 activity-title">
-                                        {activity.title}
-                                        <span className={`badge ms-2 ${activity.is_completed ? 'bg-success' : 'bg-warning text-dark'}`}>
-                                          {activity.is_completed ? 'Completed' : 'Pending'}
-                                        </span>
-                                      </h5>
-                                      <p className="activity-category">
-                                        <i className="bi bi-tag-fill me-1"></i>
-                                        {activity.category}
-                                      </p>
-                                    </div>
+                              {day.activities_in_day.map((activity, aIndex) => {
+                                // {console.log(activityId)}
+                                const localKey = `${activityId}-${aIndex}`;
+                                const isEditingThis =
+                                  editingActivity === localKey;
 
-                                    {/* Section 2: Time and Location */}
-                                    {console.log(activity.start_time)}
-                                    <div className="activity-details text-end">
-                                     <p className="activity-time fw-bold text-primary mb-0">
-                                        {formatTime(day.Date, activity.start_time)} - {formatTime(day.Date, activity.end_time)}
-                                      </p>
-                                      {activity.location && (
-                                        <p className="mb-0 text-secondary activity-location">
-                                          <i className="bi bi-geo-alt-fill me-1"></i>
-                                          {activity.location}
-                                        </p>
-                                      )}
-                                      {activity.cost && (
-                                        <p className="mb-0 text-info activity-cost">
-                                          Cost: ${activity.cost}
-                                        </p>
-                                      )}
-                                    </div>
-                                  </div>
+                                return (
+                                  <React.Fragment key={localKey}>
+                                    {console.log(
+                                      "🟣 Rendering ActivityEdit with activity_id:",
+                                      localKey,
+                                      "and activity:",
+                                      activity
+                                    )}
 
-                                  {/* Section 3: Notes (optional, displays on a new line) */}
-                                  {activity.notes && (
-                                    <small className="text-break mt-2 d-block activity-notes">
-                                      **Notes:** {activity.notes}
-                                    </small>
-                                  )}
-                                </li>
-                              ))}
+                                    {isEditingThis ? (
+                                      <ActivityEdit
+                                        activity_id={activity.id}
+                                        activity={activity}
+                                        dayDate={day.Date}
+                                        formatTime={formatTime}
+                                        onUpdate={(updatedActivity) => {
+                                          // updatedActivity is the object returned by the API after PATCH
+                                          setLocalItinerary((prev) =>
+                                            prev.map((d) => {
+                                              if (d.id !== day.id) return d;
+                                              return {
+                                                ...d,
+                                                activities_in_day:
+                                                  d.activities_in_day.map(
+                                                    (act) =>
+                                                      // prefer matching by activity id if present, otherwise fallback to index
+                                                      act.id &&
+                                                      updatedActivity.id
+                                                        ? act.id ===
+                                                          updatedActivity.id
+                                                          ? {
+                                                              ...act,
+                                                              ...updatedActivity,
+                                                            }
+                                                          : act
+                                                        : act
+                                                  ),
+                                              };
+                                            })
+                                          );
+                                          setEditingActivity(null);
+                                        }}
+                                      />
+                                    ) : (
+                                      <ActivityCard
+                                        activity={activity}
+                                        dayDate={day.Date}
+                                        formatTime={formatTime}
+                                        onEdit={() =>
+                                          // console.log({act});
+                                          setEditingActivity(localKey)
+                                        }
+                                      />
+                                    )}
+                                  </React.Fragment>
+                                );
+                              })}
                             </ul>
-                            ) : (
+                          ) : (
                             <p>No activities planned for this day.</p>
                           )}
                         </div>
                       </div>
                     </div>
-                    )
+                  );
                 })}
-                </div>
-              )} 
-            </div>
-          )}
-        </div>
+              </div>
+            )}
+          </div>
+        )}
       </div>
+    </div>
   );
 }
 
