@@ -1,12 +1,18 @@
-// ActivityCard.jsx
-import React from "react";
+import { useActivityDelete } from "../../hooks/useActivityDelete";
 
-export function ActivityCard({ activity, dayDate, onEdit, formatTime }) {
+export function ActivityCard({ activity, dayDate, onEdit, formatTime, onDelete }) {
+  const { deleteActivity, deleting } = useActivityDelete();
+
   const start = activity?.start_time;
   const end = activity?.end_time;
 
   const safeText = (value, label) => {
-    if (!value || value === "string" || value === "undefined" || value === "null") {
+    if (
+      !value ||
+      value === "string" ||
+      value === "undefined" ||
+      value === "null"
+    ) {
       return <span className="text-muted">No {label} available</span>;
     }
     return value;
@@ -20,6 +26,21 @@ export function ActivityCard({ activity, dayDate, onEdit, formatTime }) {
       : end
       ? `${formatTime(dayDate, end)}`
       : null;
+
+  const handleDeleteActivity = async (activity_id) => {
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this activity?"
+    );
+    if (!confirmDelete) return;
+
+    try {
+      await deleteActivity(activity_id);
+      // notify parent so it can reload/update activities for the day
+      onDelete && onDelete(activity_id);
+    } catch (error) {
+      console.error("Failed to delete activity:", error);
+    }
+  };
 
   return (
     <li className="list-group-item p-3 mb-2">
@@ -36,20 +57,31 @@ export function ActivityCard({ activity, dayDate, onEdit, formatTime }) {
               }}
             />
           </div>
-          {console.log(activity)}
+          {/* {console.log(activity)} */}
 
           <div className="col">
             <div className="card-body py-2 px-3">
               <div className="d-flex flex-column flex-md-row justify-content-between align-items-start">
                 <div className="mb-2 mb-md-0 pe-md-3" style={{ minWidth: 0 }}>
                   <div className="d-flex align-items-center">
-                    <h5 className="mb-0 text-truncate" title={activity?.title || ""}>
-                      {activity?.title || <span className="text-muted">No title available</span>}
+                    <h5
+                      className="mb-0 text-truncate"
+                      title={activity?.title || ""}
+                    >
+                      {activity?.title || (
+                        <span className="text-muted">No title available</span>
+                      )}
                     </h5>
 
                     <span
-                      className={`ms-2 badge ${activity?.is_completed ? "bg-success" : "bg-warning text-dark"}`}
-                      aria-label={activity?.is_completed ? "Completed" : "Pending"}
+                      className={`ms-2 badge ${
+                        activity?.is_completed
+                          ? "bg-success"
+                          : "bg-warning text-dark"
+                      }`}
+                      aria-label={
+                        activity?.is_completed ? "Completed" : "Pending"
+                      }
                     >
                       {activity?.is_completed ? "Completed" : "Pending"}
                     </span>
@@ -62,7 +94,9 @@ export function ActivityCard({ activity, dayDate, onEdit, formatTime }) {
                         {safeText(activity.category, "category")}
                       </small>
                     ) : (
-                      <small className="text-muted">No category available</small>
+                      <small className="text-muted">
+                        No category available
+                      </small>
                     )}
                   </div>
                 </div>
@@ -83,15 +117,21 @@ export function ActivityCard({ activity, dayDate, onEdit, formatTime }) {
                         {safeText(activity.location, "location")}
                       </small>
                     ) : (
-                      <small className="d-block text-muted">No location available</small>
+                      <small className="d-block text-muted">
+                        No location available
+                      </small>
                     )}
                   </div>
 
                   <div>
                     {activity?.cost ? (
-                      <small className="d-block text-info">Cost: {safeText(`$${activity.cost}`, "cost")}</small>
+                      <small className="d-block text-info">
+                        Cost: {safeText(`$${activity.cost}`, "cost")}
+                      </small>
                     ) : (
-                      <small className="d-block text-muted">No cost available</small>
+                      <small className="d-block text-muted">
+                        No cost available
+                      </small>
                     )}
                   </div>
 
@@ -108,6 +148,17 @@ export function ActivityCard({ activity, dayDate, onEdit, formatTime }) {
                       Edit Activity
                     </button>
                   </div>
+                  <div className="mt-2">
+                    <button
+                      type="button"
+                      className="btn btn-sm btn-outline-danger"
+                      onClick={() => handleDeleteActivity(activity.id)}
+                      disabled={deleting}
+                      title="Delete Activity"
+                    >
+                      Delete Activity
+                    </button>
+                  </div>
                 </div>
               </div>
 
@@ -115,7 +166,9 @@ export function ActivityCard({ activity, dayDate, onEdit, formatTime }) {
 
               <div>
                 {activity?.notes ? (
-                  <small className="text-muted d-block">{safeText(activity.notes, "notes")}</small>
+                  <small className="text-muted d-block">
+                    {safeText(activity.notes, "notes")}
+                  </small>
                 ) : (
                   <small className="text-muted">No notes available</small>
                 )}

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
@@ -10,8 +10,10 @@ from schemas.schemas import ActivityCreate, Activity, ActivityUpdate
 router = APIRouter(prefix = "/activities", tags=["activities"])
 
 @router.post("/", response_model=Activity, status_code=status.HTTP_201_CREATED)
-async def create_activity(activity_in: ActivityCreate, db: AsyncSession = Depends(get_async_session)):
-    db_activity = models.Activity(**activity_in.model_dump())
+async def create_activity(request: Request,activity_in: ActivityCreate, db: AsyncSession = Depends(get_async_session)):
+    body = await request.json()
+    itinerary_id = body.get("itinerary_id")
+    db_activity = models.Activity(**activity_in.model_dump(),itinerary_id=itinerary_id)
     db.add(db_activity)
     try:
         await db.commit()

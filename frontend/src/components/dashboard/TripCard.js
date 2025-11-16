@@ -3,17 +3,19 @@ import { useTripLoader } from "../../hooks/useTripLoader";
 import { useItineraryLoader } from "../../hooks/useItineraryLoader";
 import { formatTime, formatDate } from "../../utils/utils";
 import { ItineraryCreate } from "../tripForm/ItineraryCreate";
-import { useUpdateActivity } from "../../hooks/useUpdateActivity";
-// import { useUpdateItinerary } from "../../hooks/useUpdateItinerary";
+import { useUpdateActivity } from "../../hooks/useActivityUpdate";
 import { ItineraryEdit } from "../tripForm/ItineraryEdit";
 import { ActivityCard } from "./ActivityCard";
 import ActivityEdit from "../tripForm/ActivityEdit";
+import { ActivityCreate } from "../tripForm/ActivityCreate";
 
 function TripCard({ trip_id }) {
   const { trip, loading, error, loadTrip } = useTripLoader(trip_id);
 
   const [showItineraryViewer, setShowItineraryViewer] = useState(false);
   const [showItineraryForm, setShowItineraryForm] = useState(false);
+  const [showActivityCreate, setShowActivityCreate] = useState(false);
+  const [activeDay, setActiveDay] = useState(null);
 
   const { updateActivity, loading: updatingActivity } = useUpdateActivity();
   // const { updateItinerary, loading: updatingItinerary} = useUpdateItinerary();
@@ -232,7 +234,7 @@ function TripCard({ trip_id }) {
                   <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z" />
                   <path
                     fillRule="evenodd"
-                    d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"
+                    d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"
                   />
                 </svg>
               </button>
@@ -247,6 +249,8 @@ function TripCard({ trip_id }) {
                   const activityId = day.id ?? null;
                   const collapseId = `collapse-${trip.id}-${index}`; // Unique ID for collapse
                   const headingId = `heading-${trip.id}-${index}`; // Unique ID for heading
+                  const activitiesCount = day.activities_in_day?.length ?? 0;
+                  
                   return (
                     <div className="accordion-item" key={activityId}>
                       {/* <div className="accordion-item" key={index}> */}
@@ -293,8 +297,7 @@ function TripCard({ trip_id }) {
                           {/* {console.log(activityId)}
                            {console.log(day.activities_in_day )} */}
                           {/* inside the accordion-body where you have day.activities_in_day */}
-                          {day.activities_in_day &&
-                          day.activities_in_day.length > 0 ? (
+                          {day.activities_in_day && day.activities_in_day.length > 0 ? (
                             <ul className="list-group">
                               {day.activities_in_day.map((activity, aIndex) => {
                                 // {console.log(activityId)}
@@ -350,10 +353,23 @@ function TripCard({ trip_id }) {
                                         activity={activity}
                                         dayDate={day.Date}
                                         formatTime={formatTime}
-                                        onEdit={() =>
-                                          // console.log({act});
-                                          setEditingActivity(localKey)
-                                        }
+                                        onEdit={() => setEditingActivity(localKey)}
+                                        onDelete={(deletedActivityId) => {
+                                          // remove the activity from localItinerary for this day
+                                          setLocalItinerary((prev) =>
+                                            prev.map((d) =>
+                                              d.id !== day.id
+                                                ? d
+                                                : {
+                                                    ...d,
+                                                    activities_in_day:
+                                                      d.activities_in_day.filter(
+                                                        (act) => act.id !== deletedActivityId
+                                                      ),
+                                                  }
+                                            )
+                                          );
+                                        }}
                                       />
                                     )}
                                   </React.Fragment>
@@ -361,7 +377,51 @@ function TripCard({ trip_id }) {
                               })}
                             </ul>
                           ) : (
-                            <p>No activities planned for this day.</p>
+                            <div>
+                              <p>No activities planned for this day.</p>
+                              <button
+                                className="btn btn-sm btn-outline-primary"
+                                onClick={() => {
+                                  // show the create form so user can add activities
+                                  setActiveDay(day.id);
+                                  setShowActivityCreate(true);
+                                }}
+                              >
+                                + Add Activity
+                              </button>
+                            </div>
+                          )}
+                          {console.log("Active Day:", day.id)}
+
+                          {/* Activity Create Form - show only for active day */}
+                          {showActivityCreate && activeDay === day.id && (
+                            <ActivityCreate
+                              activity_date={day.Date}
+                              itinerary_id = {day.id}
+                              transport_id={day.transport_id || 0}
+                              onActivityCreated={(newActivity) => {
+                                // Add new activity to the day
+                                setLocalItinerary((prev) =>
+                                  prev.map((d) =>
+                                    d.id === day.id
+                                      ? {
+                                          ...d,
+                                          activities_in_day: [
+                                            ...d.activities_in_day,
+                                            newActivity,
+                                          ],
+                                        }
+                                      : d
+                                  )
+                                );
+                                setShowActivityCreate(false);
+                                setActiveDay(null);
+                              }}
+                              onCancel={() => {
+                                setShowActivityCreate(false);
+                                setActiveDay(null);
+                              }}
+                            />
                           )}
                         </div>
                       </div>

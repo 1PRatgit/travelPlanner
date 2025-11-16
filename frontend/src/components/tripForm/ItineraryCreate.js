@@ -1,22 +1,30 @@
 import { useItineraryCreate } from "../../hooks/useItineraryCreate";
-export function ItineraryCreate({ onItineraryCreated, onSuccess, trip_id }){ //understand this ****** on...created
-    const { 
-        formData, 
-        loading, 
-        message,
-        handleMainChange, 
-        handleAddActivity, 
-        handleActivityChange, 
-        handleRemoveActivity, 
-        createNewItinerary 
-    } = useItineraryCreate({ onItineraryCreated: onSuccess ?? onItineraryCreated, trip_id });
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        createNewItinerary();
-    };
-    const day_number = 1;
-   return (
+const TRANSPORT_OPTIONS = [
+  { id: 0, label: "None" },
+  { id: 1, label: "✈️ Flight" },
+  { id: 2, label: "🚗 Road" },
+  { id: 3, label: "🚂 Train" },
+];
+
+export function ItineraryCreate({ onItineraryCreated, onSuccess, trip_id }) {
+  const { 
+    formData, 
+    loading, 
+    message,
+    handleMainChange, 
+    handleAddActivity, 
+    handleActivityChange, 
+    handleRemoveActivity, 
+    createNewItinerary 
+  } = useItineraryCreate({ onItineraryCreated: onSuccess ?? onItineraryCreated, trip_id });
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    createNewItinerary();
+  };
+
+  return (
     <div className="card shadow-sm border-0" style={{ borderRadius: "10px" }}>
       <div
         className="card-header text-center"
@@ -60,18 +68,21 @@ export function ItineraryCreate({ onItineraryCreated, onSuccess, trip_id }){ //u
                 required
               />
             </div>
-            {/* Transport ID */}
+            {/* Transportation Dropdown */}
             <div className="col-md-4 mb-3">
               <label className="form-label fw-semibold">Transportation</label>
-              <input
-                type="number"
+              <select
                 className="form-control"
                 name="transport_id"
-                placeholder="e.g., 1 (for flight)"
                 value={formData.transport_id}
                 onChange={handleMainChange}
-                min="0"
-              />
+              >
+                {TRANSPORT_OPTIONS.map((option) => (
+                  <option key={option.id} value={option.id}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
 

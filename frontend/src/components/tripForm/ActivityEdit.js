@@ -1,6 +1,6 @@
 // ActivityCardEditable.jsx
 import React, { useState, useEffect } from "react";
-import { useUpdateActivity } from "../../hooks/useUpdateActivity";
+import { useUpdateActivity } from "../../hooks/useActivityUpdate";
 
 /**
  * Props:
