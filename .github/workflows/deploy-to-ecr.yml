@@ -1,0 +1,67 @@
+name: Build and push Docker images to ECR
+
+on:
+  push:
+    branches: [ main ]
+
+env:
+  IMAGE_TAG: ${{ github.sha }}
+  PLATFORMS: linux/amd64
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        include:
+          - service: backend
+            repo: travelplanner-backend
+            context: ./backend
+            dockerfile: ./backend/Dockerfile
+          - service: frontend
+            repo: travelplanner-frontend
+            context: ./frontend
+            dockerfile: ./frontend/Dockerfile
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Set ECR registry env
+        run: |
+          echo "ECR_REGISTRY=${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com" >> $GITHUB_ENV
+
+      - name: Ensure ECR repository exists
+        run: |
+          aws ecr describe-repositories --repository-names "${{ matrix.repo }}" >/dev/null 2>&1 || \
+            aws ecr create-repository --repository-name "${{ matrix.repo }}" --region "${{ secrets.AWS_REGION }}"
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Set up QEMU (for multi-platform builds)
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push Docker image ({{ matrix.service }})
+        uses: docker/build-push-action@v5
+        with:
+          context: ${{ matrix.context }}
+          dockerfile: ${{ matrix.dockerfile }}
+          push: true
+          platforms: ${{ env.PLATFORMS }}
+          tags: |
+            ${{ env.ECR_REGISTRY }}/${{ matrix.repo }}:${{ env.IMAGE_TAG }}
+            ${{ env.ECR_REGISTRY }}/${{ matrix.repo }}:latest
