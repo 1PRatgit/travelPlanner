@@ -5,7 +5,7 @@ from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
     SQLALCHEMY_DATABASE_URL: str
-    API_PREFIX: str = "/api"
+    API_PREFIX: str = "/"
     DEBUG: bool = False
     ALLOW_ORIGINS: List[str] = []
 
