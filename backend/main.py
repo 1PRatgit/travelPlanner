@@ -17,6 +17,13 @@ app = FastAPI(
     redoc_url="/redoc",
 )
 print(f" ***************************CORS Allowed Origins: {settings.ALLOW_ORIGINS}")
+default_origins = [
+    "http://15.207.106.124",
+    "http://15.207.106.124:3000",
+    "http://localhost:3000",
+]
+
+origins = settings.ALLOW_ORIGINS or default_origins
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.ALLOW_ORIGINS,
