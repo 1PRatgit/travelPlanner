@@ -1,4 +1,4 @@
-name: Build and push Docker images to ECR
+name: Build, push and deploy
 
 on:
   push:
@@ -65,3 +65,29 @@ jobs:
           tags: |
             ${{ env.ECR_REGISTRY }}/${{ matrix.repo }}:${{ env.IMAGE_TAG }}
             ${{ env.ECR_REGISTRY }}/${{ matrix.repo }}:latest
+
+  deploy-to-ec2:
+    needs: build-and-push      # run only after images are pushed
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: SSH into EC2 and deploy
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd /home/ec2-user/travelplanner
+            # login to ECR from EC2 so it can pull images
+            aws ecr get-login-password --region ${{ secrets.AWS_REGION }} \
+              | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
+
+            # pull latest images
+            docker compose pull backend frontend || docker-compose pull backend frontend
+
+            # restart containers with new images
+            docker compose up -d backend frontend || docker-compose up -d backend frontend
+
+            # optional: clean up old images
+            docker image prune -f
