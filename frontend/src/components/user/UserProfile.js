@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import {useUserTrips} from '../../hooks/useUserTrips';
 import TripCard from '../dashboard/TripCard';
+import TripList from '../trips/TripList';
 import NavBar from '../NavBar';
 const UserProfile = () => {
     const [showModal, setShowModal] = useState(false); // optional: if you want to open modal from profile too
@@ -50,6 +51,7 @@ const UserProfile = () => {
                         <p className="text-muted">No trips yet. Start planning your adventure!</p>
                     )}
                 </div>
+                {/* <TripList {...trips} /> */}
 
                 
                 </div>
