@@ -12,9 +12,9 @@ router = APIRouter(prefix="/trips", tags=["trips"])
 TripModel = models.Trip
 
 #***** To create a trip *****
-@router.post("/", response_model=Trip, status_code=status.HTTP_201_CREATED)
-async def create_trip(trip_in: TripCreate, db: AsyncSession = Depends(get_async_session)):
-    db_trip = TripModel(**trip_in.model_dump(), owner_id=1)  # owner_id placeholder
+@router.post("/{user_id}", response_model=Trip, status_code=status.HTTP_201_CREATED)
+async def create_trip(trip_in: TripCreate,user_id:int, db: AsyncSession = Depends(get_async_session)):
+    db_trip = TripModel(**trip_in.model_dump(), owner_id=user_id)  # owner_id placeholder
     db.add(db_trip)
     try:
         await db.commit()
@@ -32,6 +32,7 @@ async def create_trip(trip_in: TripCreate, db: AsyncSession = Depends(get_async_
             selectinload(TripModel.trip_to_accommodation),
             selectinload(TripModel.itineraries),
             selectinload(TripModel.owner),
+            selectinload(TripModel.itineraries).selectinload(models.Itinerary.activities_in_day),
         )
     )
     trip_with_rels = result.scalars().first()
@@ -85,3 +86,25 @@ async def delete_trip(trip_id: int, db: AsyncSession = Depends(get_async_session
         await db.rollback()
         raise
     return
+
+@router.get("/user/{user_id}", response_model=List[Trip])
+async def get_user_trips(user_id: int, db: AsyncSession = Depends(get_async_session)):
+   
+    result = await db.execute(
+        select(TripModel)
+        .filter(TripModel.owner_id == user_id)
+        .options(
+            # Eagerly load all relationships required by the TripSchema
+            selectinload(TripModel.trip_to_accommodation),
+            selectinload(TripModel.itineraries),
+            selectinload(TripModel.owner),
+            selectinload(TripModel.itineraries).selectinload(models.Itinerary.activities_in_day),
+        )
+    )
+    user_trips = result.scalars().all()
+    if not user_trips:
+        user_exists = await db.scalar(select(models.User).filter_by(owner_id=user_id))
+        if not user_exists:
+            raise HTTPException(status_code=404, detail=f"User with ID {user_id} not found")
+
+    return user_trips

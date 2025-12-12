@@ -15,12 +15,7 @@ export function useTripCreate({onTripCreated}) {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null);
 
-  // const handleChange = (e) => {
-  //   const { name, value } = e.target;
-  //   setFormData((prev) => ({ ...prev, [name]: value }));
-  // };
-
-  const createNewTrip = async () => {
+  const createNewTrip = async (user_id) => {
     setLoading(true);
     setMessage(null);
 
@@ -31,7 +26,7 @@ export function useTripCreate({onTripCreated}) {
     };
 
     try {
-      const response = await api.post("/trips", payload);
+      const response = await api.post(`/trips/${user_id}`, payload);
       setMessage({ type: "success", text: "Trip created successfully!" });
       setFormData({
         title: "",

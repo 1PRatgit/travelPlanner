@@ -1,13 +1,13 @@
 import { useTripCreate } from "../../hooks/useTripCreate";
 
-export default function TripCreate({ onTripCreated }) {
+export default function TripCreate({ user_id,onTripCreated }) {
   const { formData, setFormData, loading, message, createNewTrip } =
     useTripCreate({ onTripCreated });
   
   // ✅ Define submit handler separately
   const handleSubmit = (e) => {
     e.preventDefault();
-    createNewTrip();
+    createNewTrip(user_id);
   };
 
   return (

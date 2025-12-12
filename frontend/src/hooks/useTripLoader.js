@@ -11,7 +11,7 @@ export function useTripLoader (trip_id) {
     setLoading(true);
     setError(null);
     try {
-      const response = await api.get(`/trips/${trip_id}/`);
+      const response = await api.get(`/trips/${trip_id}`);
       setTrip(response.data);
       
     } catch (err) {

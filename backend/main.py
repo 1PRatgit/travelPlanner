@@ -20,6 +20,7 @@ print(f" ***************************CORS Allowed Origins: {settings.ALLOW_ORIGIN
 default_origins = [
     "http://15.207.106.124",
     "http://15.207.106.124:3000",
+    "http://localhost:3001",
     "http://localhost:3000",
 ]
 
@@ -47,3 +48,4 @@ async def on_startup():
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)
+    # uvicorn.run(app, host="127.0.0.1", port=5000, reload=True). no need for this as uvicorn command can be used in terminal to reload port 5000

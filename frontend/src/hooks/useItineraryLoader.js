@@ -13,7 +13,7 @@ export function useItineraryLoader(trip_id) {
       const response = await api.get(`/itineraries/trip/${trip_id}/`);
       setItinerary(response.data);
     } catch (err) {
-      if (err.response?.status === 404) {
+      if (err.response?.status === 400) {
         setError("Itinerary not found.");
       } else {
         setError("An error occurred while loading Itinerary.");

@@ -31,6 +31,7 @@ class Trip(TripBase):
     is_active: bool
     created_at: datetime
     updated_at: datetime
+    owner_id: int
     itineraries: List[ItineraryDay] = Field(default_factory=list, alias="itineraries")
     trip_to_accommodation: List[Accommodation] = Field(default_factory=list, alias="accommodations")
 
@@ -123,10 +124,11 @@ class UserBase(BaseModel):
     username: str = Field(..., max_length=150)
     email: str = Field(..., max_length=255)
     full_name: Optional[str] = Field(None, max_length=255)
-    hashed_password: str 
+    
+    
 
 class UserCreate(UserBase):
-    pass
+    password: str = Field(..., max_length=72)
     
 class UserResponse(UserBase):
     id: int
