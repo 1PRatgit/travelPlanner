@@ -11,8 +11,6 @@
   <img src="https://img.shields.io/badge/Frontend-React-61DAFB?style=flat" />
   <img src="https://img.shields.io/badge/Database-PostgreSQL-336791?style=flat" />
   <img src="https://img.shields.io/badge/License-MIT-yellow.svg?style=flat" />
-  <img src="https://img.shields.io/github/issues/your-username/travelplanner?style=flat" />
-  <img src="https://img.shields.io/github/stars/your-username/travelplanner?style=social" />
 </p>
 
 ---
@@ -56,9 +54,6 @@
 
 * [📄 License](#license)
 
-* [Architecture Diagrams](#architecture-diagrams)
-
-* [License](#license)
 
 ---
 
