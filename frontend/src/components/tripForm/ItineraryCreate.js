@@ -34,7 +34,7 @@ export function ItineraryCreate({ onItineraryCreated, onSuccess, trip_id }) {
         }}
       >
         <h5 className="fw-bold mb-0" style={{ color: "#c2185b" }}>
-          📅 Create Itinerary Day
+          📅 Create Day for this Itinerary
         </h5>
       </div>
 

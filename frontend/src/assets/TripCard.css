@@ -1,0 +1,63 @@
+.trip-card-v2 {
+  background: #fff;
+  border-radius: 14px;
+  padding: 20px;
+  box-shadow: 0 8px 30px rgba(255, 120, 170, 0.15);
+}
+
+.trip-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.trip-content {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 20px;
+}
+
+.itinerary-panel {
+  background: #fafafa;
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.itinerary-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.add-day-btn {
+  background: linear-gradient(135deg, #ff6ea8, #ff8fc7);
+  border: none;
+  color: white;
+  padding: 6px 14px;
+  border-radius: 20px;
+  cursor: pointer;
+}
+
+.timeline {
+  background: #fff0f6;
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.timeline-node {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.circle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #ff6ea8;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 12px;
+}

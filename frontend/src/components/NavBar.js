@@ -81,10 +81,9 @@ export default function NavBar({ onTripCreated }) {
                 <Link className="nav-link" to="/profile">My Trips</Link>
               </li>
               <li className="nav-item me-4">
-                <Link className="nav-link" to="/SeasonalDeals">Seasonal Deals</Link>
+                <Link className="nav-link" to="/GetStarted">GetStarted</Link>
               </li>
 
-              {/* {userActive && ( */}
                 <li className="nav-item me-3">
                   <button
                     className="btn btn-rose fw-semibold"
@@ -98,7 +97,6 @@ export default function NavBar({ onTripCreated }) {
                     + New Trip
                   </button>
                 </li>
-              {/* )} */}
 
               
                 <li className="nav-item d-flex align-items-center me-4">

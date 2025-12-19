@@ -1,20 +1,14 @@
 /**
- * Ultimate fix for the hyphen issue. It forces the combined string to be 
- * interpreted in the user's timezone, then formats it.
  * @param {string} dateStr - The date part, e.g., "2025-10-27" (from day.date)
  * @param {string} timeStr - The time part, e.g., "09:19:13.922000"
  * @returns {string} The formatted time, e.g., "9:19 AM" or a placeholder.
  */
 
 export const formatTime = (timeStr) => {
-    // 1. Basic check for null/empty string
     if (!timeStr) return "";
     
     // Attempt to create a Date object
     const date = new Date(timeStr);
-    
-    // 2. CRITICAL VALIDATION: Check if the date object is valid (i.e., not 'Invalid Date')
-    // new Date().getTime() returns NaN for an 'Invalid Date' object.
     if (isNaN(date.getTime())) {
         // Return a clear indicator that the data was bad
         return "Time Data Error"; 
