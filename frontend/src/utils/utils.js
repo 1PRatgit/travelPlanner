@@ -5,46 +5,6 @@
  * @param {string} timeStr - The time part, e.g., "09:19:13.922000"
  * @returns {string} The formatted time, e.g., "9:19 AM" or a placeholder.
  */
-// export const formatActivityTime = (dateStr, timeStr) => {
-//     if (!dateStr || !timeStr) return "";
-    
-//     // 1. CLEANUP: Ensure time has only three milliseconds digits (or none)
-//     let cleanedTime = timeStr;
-//     if (timeStr.includes('.')) {
-//         const dotIndex = timeStr.indexOf('.');
-//         const secondsPart = timeStr.substring(0, dotIndex);
-//         // Only grab up to 3 digits for milliseconds
-//         const millisecondsPart = timeStr.substring(dotIndex + 1, dotIndex + 4); 
-//         cleanedTime = `${secondsPart}.${millisecondsPart}`;
-//     } else {
-//         // If no milliseconds, ensure it's at least 'HH:MM:SS'
-//         cleanedTime = timeStr;
-//     }
-    
-//     // 2. CRITICAL FIX: Use the full timestamp string.
-//     // We do NOT append 'Z' or rely on local-time parsing.
-//     const fullDateTimeStr = `${dateStr}T${cleanedTime}`;
-
-//     // 3. FORCE DATE PARSING: Use a method that is less prone to timezone errors.
-//     // The Date constructor is notoriously inconsistent, but this format is the best bet.
-//     const date = new Date(fullDateTimeStr);
-    
-//     // 4. Validation
-//     if (isNaN(date.getTime())) {
-//         console.error(`Final time parsing failed for: ${fullDateTimeStr}`);
-//         return "N/A (Parse Error)"; 
-//     }
-    
-//     // 5. Formatting options (kept the same)
-//     const options = {
-//         hour: 'numeric',
-//         minute: 'numeric',
-//         hour12: true 
-//     };
-    
-//     // 6. Return the local time
-//     return date.toLocaleTimeString(undefined, options);
-// };
 
 export const formatTime = (timeStr) => {
     // 1. Basic check for null/empty string

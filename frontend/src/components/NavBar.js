@@ -2,13 +2,13 @@
 import { useState, useEffect } from "react";
 import TripCreate from "./tripForm/TripCreate";
 import { useAuth } from "../contexts/AuthContext";
-import { Navigate, useNavigate } from "react-router-dom";
+import { Link,Navigate, useNavigate } from "react-router-dom";
 
-export default function NavBar({ userActive = true, onTripCreated }) {
+export default function NavBar({ onTripCreated }) {
   const [showModal, setShowModal] = useState(false);
-  const {logout } = useAuth();
+  const {logout, user } = useAuth();
   const navigate = useNavigate();
-
+  const isActuallyLoggedIn = !!user;
   // closes modal when ESC or backdrop clicked
   useEffect(() => {
     const handleKey = (e) => e.key === "Escape" && setShowModal(false);
@@ -30,6 +30,7 @@ export default function NavBar({ userActive = true, onTripCreated }) {
     // notify parent (if any) and close modal
     setShowModal(false);
     if (onTripCreated) onTripCreated(trip);
+    window.location.reload();
   };
   const handleLogout = () => {
     logout();
@@ -44,7 +45,7 @@ export default function NavBar({ userActive = true, onTripCreated }) {
         style={{ backgroundColor: "#ffd6e8" }} // rose background
       >
         <div className="container-fluid">
-          <a className="navbar-brand d-flex align-items-center ms-4" href="/">
+          <Link className="navbar-brand d-flex align-items-center ms-4" to="/">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="20"
@@ -57,7 +58,7 @@ export default function NavBar({ userActive = true, onTripCreated }) {
               <path d="M12.166 8.94C12.665 8.118 13 7.208 13 6a5 5 0 1 0-10 0c0 1.208.335 2.118.834 2.94C5.62 10.948 7.1 13.01 8 14c.9-.99 2.38-3.052 4.166-5.06zM8 8a2 2 0 1 1 0-4 2 2 0 0 1 0 4z" />
             </svg>
             <span className="fs-5 fw-bold">travel planner</span>
-          </a>
+          </Link>
 
           <button
             className="navbar-toggler"
@@ -70,11 +71,20 @@ export default function NavBar({ userActive = true, onTripCreated }) {
           >
             <span className="navbar-toggler-icon" />
           </button>
-          {userActive ?(
+          {isActuallyLoggedIn ?(
           <div className="collapse navbar-collapse" id="navbarSupportedContent">
             <ul className="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center">
+              <li className="nav-item me-4">
+                <Link className="nav-link" to="/">Home</Link>
+              </li>
+              <li className="nav-item me-4">
+                <Link className="nav-link" to="/profile">My Trips</Link>
+              </li>
+              <li className="nav-item me-4">
+                <Link className="nav-link" to="/SeasonalDeals">Seasonal Deals</Link>
+              </li>
 
-              {userActive && (
+              {/* {userActive && ( */}
                 <li className="nav-item me-3">
                   <button
                     className="btn btn-rose fw-semibold"
@@ -88,7 +98,7 @@ export default function NavBar({ userActive = true, onTripCreated }) {
                     + New Trip
                   </button>
                 </li>
-              )}
+              {/* )} */}
 
               
                 <li className="nav-item d-flex align-items-center me-4">
@@ -126,21 +136,14 @@ export default function NavBar({ userActive = true, onTripCreated }) {
          
           (<div className="collapse navbar-collapse" id="navbarSupportedContent">
             <ul className="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center">
-            
               <li className="nav-item me-4">
-                <a className="nav-link" href="/SeasonalDeals">
-                  Seasonal Deals
-                </a>
+                <Link className="nav-link" to="/">Home</Link>
               </li>
-               <li className="nav-item me-4">
-                <a className="nav-link" href="/ConnectWithTravelers">
-                  Connect with Travelers
-                </a>
+              <li className="nav-item me-4">
+                <Link className="nav-link" to="/login">Login/Signup</Link>
               </li>
-                <li className="nav-item me-4">
-                <a className="nav-link" href="/Feedback">
-                  Feedback
-                </a>
+              <li className="nav-item me-4">
+                <Link className="nav-link" to="/SeasonalDeals">Seasonal Deals</Link>
               </li>
             </ul>
           </div>
@@ -180,9 +183,9 @@ export default function NavBar({ userActive = true, onTripCreated }) {
                   aria-label="Close"
                 ></button>
               </div>
-
+              
               <div className="modal-body">
-                <TripCreate onTripCreated={handleTripCreated} />
+                <TripCreate user_id={user.id} onTripCreated={handleTripCreated} />
               </div>
             </div>
           </div>

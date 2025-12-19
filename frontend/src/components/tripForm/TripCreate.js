@@ -1,6 +1,7 @@
 import { useTripCreate } from "../../hooks/useTripCreate";
 
 export default function TripCreate({ user_id,onTripCreated }) {
+  {console.log("User ID in NavBar:", user_id)}
   const { formData, setFormData, loading, message, createNewTrip } =
     useTripCreate({ onTripCreated });
   
